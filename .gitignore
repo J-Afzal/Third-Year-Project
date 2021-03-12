@@ -1,6 +1,7 @@
 # MSVC projects
 Debug_Project/
 Release_Project/
+Test_Project/
 yolov4.weights
 0-Vertical.mp4
 0-Horizontal.mp4
