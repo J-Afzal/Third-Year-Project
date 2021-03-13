@@ -11,17 +11,16 @@ int main(void)
 {
 	auto begin = std::chrono::high_resolution_clock::now();
 
-
 	////////////////////////////////////////////////////
-	// 
+	//
 	// First lane detection code will be ran without
-	// YOLO to see performance impact of YOLO
-	// 
+	// YOLOv4 to see performance impact of YOLOv4
+	//
 	// Then three variables will be tested:
 	// 	   - YOLOv4 vs YOLOv4-tiny
 	// 	   - Blob Sizes (608, 512, 416, 320, 288)
 	// 	   - CUDA vs CPU
-	//  
+	//
 	////////////////////////////////////////////////////
 
 	int numberOfRepetitions = 10;
@@ -106,7 +105,7 @@ int main(void)
 	};
 
 	std::vector<int> dnnBackend =
-	{ 
+	{
 		-1, //"",
 		5,  //"cv::dnn::DNN_BACKEND_CUDA",
 		5,	//"cv::dnn::DNN_BACKEND_CUDA",
@@ -191,9 +190,9 @@ int main(void)
 		if (yolo[i])
 		{
 			if (yoloTypeConfig[i].size() == 13)
-				temp += "YOLO";
+				temp += "YOLOv4";
 			else
-				temp += "YOLO-tiny";
+				temp += "YOLOv4-tiny";
 
 			temp += "_" + std::to_string(blobSize[i]);
 
@@ -203,14 +202,14 @@ int main(void)
 				temp += "_CUDA-Disabled";
 		}
 		else
-			temp += "NoYOLO";
+			temp += "NoYOLOv4";
 
 		temp += "_ms.txt";
 
 		outputFileNames.push_back(temp);
 	}
 
-	std::cout << "Tests to complete:" << numberOfTests;
+	std::cout << "Tests to complete: " << numberOfTests;
 	std::cout << "\nNumber of repitions: " << numberOfRepetitions << '\n';
 
 	for (int testNumber = 0; testNumber < numberOfTests; testNumber++)
@@ -219,7 +218,7 @@ int main(void)
 
 		for (int iterations = 0; iterations < numberOfRepetitions; iterations++)
 		{
-			std::cout << "\nTest " << testNumber << "/" << numberOfTests << "\t"  << outputFileNames[testNumber] << " (" << iterations+1 << "/" << numberOfRepetitions << ")";
+			std::cout << "\nTest " << testNumber+1 << "/" << numberOfTests << "\t"  << outputFileNames[testNumber] << " (" << iterations+1 << "/" << numberOfRepetitions << ")";
 
 			std::vector<int> temp;
 
@@ -1105,7 +1104,7 @@ int main(void)
 			cv::destroyAllWindows();
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			
+
 			allIterations.push_back(temp);
 		}
 
