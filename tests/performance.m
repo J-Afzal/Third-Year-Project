@@ -88,13 +88,25 @@ for i=2:2:numberOfFiles
 end
 
 % Create the plot
-set(bar(x,y), {'DisplayName'}, {' without CUDA',' with CUDA'}');
-xlabel('Frame Number');
+barChart = bar(x,y);
+set(barChart, {'DisplayName'}, {' without CUDA',' with CUDA'}');
+xlabel('YOLOv4 Type');
 ylabel('Frames per seconds (FPS)');
-ylim([0 50]);
+ylim([0 100]);
 grid on;
 title(strcat('All frame times for', {' '}, platform));
 legend();
+
+% Display the value of each bar on top of the each bar
+xtips = barChart(1).XEndPoints;
+ytips = barChart(1).YEndPoints;
+labels = string(int8(barChart(1).YData));
+text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
+
+xtips = barChart(2).XEndPoints;
+ytips = barChart(2).YEndPoints;
+labels = string(int8(barChart(2).YData));
+text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 
 % Save to .png
 f = gcf;
