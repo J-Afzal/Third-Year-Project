@@ -11,19 +11,19 @@ numberOfFiles = length(files);
 filesData = cell(numberOfFiles, 1);
 x = 1:1:numberOfDataPoints;
 
+% Read in files
 for i=1:numberOfFiles
     filesData{i} = importdata(strcat(files(i).folder, '\', files(i).name));
 end
 
-averageFrameTime = zeros(numberOfFiles, 1);
+% Calculate the averages
 averageFPS = zeros(numberOfFiles, 1);
 for i=1:numberOfFiles
     total = 0;
-    for j=1:numberOfDataPoints
+    for j=2:numberOfDataPoints-1
         total = total + filesData{i}(j);
     end
-    averageFrameTime(i) = total / numberOfDataPoints;
-    averageFPS(i) = 1000 / averageFrameTime(i);
+    averageFPS(i) = 1000 / (total / numberOfDataPoints);
 end
 
 %% All frame plots 
@@ -92,7 +92,7 @@ barChart = bar(x,y);
 set(barChart, {'DisplayName'}, {' without CUDA',' with CUDA'}');
 xlabel('YOLOv4 Type');
 ylabel('Frames per seconds (FPS)');
-ylim([0 70]);
+ylim([0 100]);
 grid on;
 title(strcat('All frame times for', {' '}, platform));
 legend();
