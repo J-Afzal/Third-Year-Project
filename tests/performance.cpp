@@ -26,7 +26,10 @@ int main(void)
 
 	int numberOfRepetitions = 10;
 	int numberOfTests = 21;
-	std::string platform = "Windows 10"; // Windows 10, Linux (Ubuntu 20.04) or Jetson Nano (4GB)
+	std::string platform = "Windows 10 Desktop";
+	// std::string platform = "Linux (Ubuntu 20.04) Desktop";
+	// std::string platform = "Jetson Nano (4GB)";
+
 	int frameCount = 1155;
 
 	// Variables that will change
