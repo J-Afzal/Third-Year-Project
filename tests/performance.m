@@ -92,7 +92,7 @@ barChart = bar(x,y);
 set(barChart, {'DisplayName'}, {' without CUDA',' with CUDA'}');
 xlabel('YOLOv4 Type');
 ylabel('Frames per seconds (FPS)');
-ylim([0 100]);
+ylim([0 70]);
 grid on;
 title(strcat('All frame times for', {' '}, platform));
 legend();
