@@ -220,6 +220,7 @@ int main(void)
 		for (int iterations = 0; iterations < numberOfRepetitions; iterations++)
 		{
 			std::cout << "\nTest " << testNumber+1 << "/" << numberOfTests << "\t"  << outputFileNames[testNumber] << " (" << iterations+1 << "/" << numberOfRepetitions << ")";
+			std::cout.flush();
 
 			std::vector<int> temp;
 
