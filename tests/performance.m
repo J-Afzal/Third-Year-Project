@@ -26,7 +26,7 @@ for i=1:numberOfFiles
     averageFPS(i) = 1000 / (total / numberOfDataPoints);
 end
 
-%% All frame plots 
+%% All frame plots
 figure1 = figure;
 set(gcf, 'Position',  [100, 100, 850, 700]);
 
@@ -50,7 +50,7 @@ newcolors = [0 0 0
              0.7 0 0
              0 0.7 0
              0.7 0 0
-             0 0.7 0];         
+             0 0.7 0];
 colororder(newcolors);
 
 for i=1:numberOfFiles
@@ -63,7 +63,7 @@ ylabel('Time to compute frame (ms)');
 axis tight;
 ylim([0 300]);
 grid on;
-title(strcat('All frame times for ', {' '}, platform));
+title(strcat('Frame times for ', {' '}, platform));
 legend('No YOLOv4', ' YOLOv4 without CUDA', 'YOLOv4 with CUDA', 'location','southoutside');
 
 % Save to .png
@@ -74,9 +74,9 @@ exportgraphics(f, strcat(platform, '/All-frame-plots.png'));
 figure2 = figure;
 set(gcf, 'Position',  [1050, 100, 850, 700]);
 
-% Set the colormap to green for CUDA and purple for 
+% Set the colormap to green for CUDA and purple for
 newcolors = [0.7 0 0
-             0 0.7 0];         
+             0 0.7 0];
 colororder(newcolors);
 
 % Create the category and y data
@@ -94,7 +94,7 @@ xlabel('YOLOv4 Type');
 ylabel('Frames per seconds (FPS)');
 ylim([0 100]);
 grid on;
-title(strcat('All frame times for', {' '}, platform));
+title(strcat('FPS values for', {' '}, platform));
 legend();
 
 % Display the value of each bar on top of the each bar
