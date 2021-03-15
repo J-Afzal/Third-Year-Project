@@ -265,7 +265,7 @@ int main(void)
 
 		// Populate blankFrame with zeros (all black) and
 		// then create a white mask that is the same size as ROI
-		blankFrame = cv::Mat(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
+		blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
 		cv::fillConvexPoly(blankFrame, maskDimensions, cv::Scalar(255, 255, 255), cv::LINE_AA, 0);
 		// Then AND blankFrame with frame to extract ROI from frame
 		cv::bitwise_and(blankFrame, frame, ROIFrame);
@@ -280,7 +280,7 @@ int main(void)
 		cv::HoughLinesP(cannyFrame, houghLines, 1, CV_PI / 180, HOUGHP_THRESHOLD, HOUGHP_MIN_LINE_LENGTH, HOUGHP_MAX_LINE_GAP);
 
 		// Make the houghFrame a blank black frame
-		houghFrame = cv::Mat(frame.rows, frame.cols, frame.type());
+		houghFrame = cv::Mat::zeros(frame.rows, frame.cols, frame.type());
 
 		// Draw thresholds for left, middle and right lines on the houghFrame
 		cv::line(houghFrame, cv::Point((ROI_BOTTOM_HEIGHT - cLeftThresholdEdge) / mLeftThresholdEdge, ROI_BOTTOM_HEIGHT), cv::Point((ROI_TOP_HEIGHT - cLeftThresholdEdge) / mLeftThresholdEdge, ROI_TOP_HEIGHT), cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
@@ -707,7 +707,7 @@ int main(void)
 				turningRequiredToReturnToCenter = "Turn Right " + std::to_string(turningRequiredToReturnToCenter_int) + "%";
 
 			// Draw the yellow box that signifies the position of car with respect to the lanes detected
-			blankFrame = cv::Mat(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
+			blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
 			cv::rectangle(blankFrame, cv::Rect(1695 - turningRequiredToReturnToCenter_int - 75, 205 - 100, 150, 200), cv::Scalar(0, 200, 200), cv::FILLED, cv::LINE_AA);
 			cv::add(frame, blankFrame, frame);
 
@@ -722,7 +722,7 @@ int main(void)
 					minY = rightMinY;
 
 				// Make blank frame a blank black frame
-				blankFrame = cv::Mat(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
+				blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
 
 				// Add the four points of the quadrangle
 				lanePoints.push_back(cv::Point((minY - cLeftLaneEdge) / mLeftLaneEdge, minY));
