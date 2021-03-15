@@ -3,7 +3,7 @@
 clear variables;
 close all;
 
-platform = 'windows';
+platform = 'Windows 10'; % Windows 10, Linux (Ubuntu 20.04) or Jetson Nano (4GB)
 numberOfDataPoints = 1155;
 
 files = dir(strcat(platform, '/*.txt'));
