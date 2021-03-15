@@ -247,6 +247,7 @@ int main(void)
 				std::string line;
 				for (int i = 0; std::getline(modelNamesFile, line); i++)
 				{
+					line.pop_back();
 					modelNamesAndColourList.insert(std::pair<std::string, cv::Scalar>(line, cv::Scalar(rand() % 256, rand() % 256, rand() % 256)));
 					modelIntsAndNames.insert(std::pair<int, std::string>(i, line));
 				}
