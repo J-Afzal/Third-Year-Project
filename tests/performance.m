@@ -3,7 +3,7 @@
 clear variables;
 close all;
 
-platform = 'Windows 10 Desktop';
+% platform = 'Windows 10 Desktop';
 % platform = 'Linux (Ubuntu 20.04) Desktop';
 % platform = 'Jetson Nano (4GB)';
 

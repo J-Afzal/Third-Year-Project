@@ -26,7 +26,7 @@ int main(void)
 
 	int numberOfRepetitions = 10;
 	int numberOfTests = 21;
-	std::string platform = "Windows 10 Desktop";
+	// std::string platform = "Windows 10 Desktop";
 	// std::string platform = "Linux (Ubuntu 20.04) Desktop";
 	// std::string platform = "Jetson Nano (4GB)";
 
