@@ -22,48 +22,38 @@ x = 1:1:numberOfDataPoints;
 % Read in files
 windowsFilesData = cell(numberOfFiles, 1);
 linuxFilesData = cell(numberOfFiles, 1);
-jetsonFilesData = cell(numberOfFiles, 1);
 for i=1:numberOfFiles
     windowsFilesData{i} = importdata(strcat(windowsFiles(i).folder, '\', windowsFiles(i).name));
     linuxFilesData{i} = importdata(strcat(linuxFiles(i).folder, '\', linuxFiles(i).name));
-    jetsonFilesData{i} = importdata(strcat(jetsonFiles(i).folder, '\', jetsonFiles(i).name));
 end
 
 % Calculate the average FPS for each file
 windowsAverageFPS = zeros(numberOfFiles, 1);
 linuxAverageFPS = zeros(numberOfFiles, 1);
-jetsonAverageFPS = zeros(numberOfFiles, 1);
 for i=1:numberOfFiles
     windowsTotal = 0;
     linuxTotal = 0;
-    jetsonTotal = 0;
     for j=2:numberOfDataPoints-1
         windowsTotal = windowsTotal + windowsFilesData{i}(j);
         linuxTotal = linuxTotal + linuxFilesData{i}(j);
-        jetsonTotal = jetsonTotal + jetsonFilesData{i}(j);
     end
     windowsAverageFPS(i) = 1000 / (windowsTotal / numberOfDataPoints);
     linuxAverageFPS(i) = 1000 / (linuxTotal / numberOfDataPoints);
-    jetsonAverageFPS(i) = 1000 / (jetsonTotal / numberOfDataPoints);
 end
 
 % Extract the max value for each yolo and blob size (cuda vs no cuda) for
 % each file
 windowsMaxFilesData = cell(numberOfTests, 1);
 linuxMaxFilesData = cell(numberOfTests, 1);
-jetsonMaxFilesData = cell(numberOfTests, 1);
 windowsMaxFPS = zeros(numberOfTests, 1);
 linuxMaxFPS = zeros(numberOfTests, 1);
-jetsonMaxFPS = zeros(numberOfTests, 1);
 
 % First value is the non yolo so read in automatically without checkings
 windowsMaxFilesData{1} = windowsFilesData{1};
 linuxMaxFilesData{1} = linuxFilesData{1};
-jetsonMaxFilesData{1} = jetsonFilesData{1};
 
 windowsMaxFPS(1) = windowsAverageFPS(1);
 linuxMaxFPS(1) = linuxAverageFPS(1);
-jetsonMaxFPS(1) = jetsonAverageFPS(1);
 
 j=2;
 for i=2:2:numberOfFiles-1
@@ -81,16 +71,25 @@ for i=2:2:numberOfFiles-1
     else
         linuxMaxFPS(j) = linuxAverageFPS(i+1);
         linuxMaxFilesData{j} = linuxFilesData{i+1};
-    end    
-
-    if (jetsonAverageFPS(i) > jetsonAverageFPS(i+1))
-        jetsonMaxFPS(j) = jetsonAverageFPS(i);
-        jetsonMaxFilesData{j} = jetsonFilesData{i};
-    else
-        jetsonMaxFPS(j) = jetsonAverageFPS(i+1);
-        jetsonMaxFilesData{j} = jetsonFilesData{i+1};
     end
     j = j + 1;
+end
+
+% Same for jetson
+jetsonFilesData = cell(numberOfTests, 1);
+for i=1:numberOfTests
+    jetsonFilesData{i} = importdata(strcat(jetsonFiles(i).folder, '\', jetsonFiles(i).name));
+end
+
+jetsonMaxFilesData = jetsonFilesData;
+jetsonMaxFPS = zeros(numberOfTests, 1);
+
+for i=1:numberOfTests
+    jetsonTotal = 0;
+    for j=2:numberOfDataPoints-1
+        jetsonTotal = jetsonTotal + jetsonFilesData{i}(j);
+    end
+    jetsonMaxFPS(i) = 1000 / (jetsonTotal / numberOfDataPoints);
 end
 
 %% Frame Times
