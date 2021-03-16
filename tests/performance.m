@@ -3,23 +3,26 @@
 clear variables;
 close all;
 
+% Platforms
 % platform = 'Windows 10 Desktop';
 % platform = 'Linux (Ubuntu 20.04) Desktop';
 % platform = 'Jetson Nano (4GB)';
 
-numberOfDataPoints = 1155;
-
+% File arrays
 files = dir(strcat(platform, '/*.txt'));
+
+% Consts
 numberOfFiles = length(files);
-filesData = cell(numberOfFiles, 1);
+numberOfDataPoints = 1155;
 x = 1:1:numberOfDataPoints;
 
 % Read in files
+filesData = cell(numberOfFiles, 1);
 for i=1:numberOfFiles
     filesData{i} = importdata(strcat(files(i).folder, '\', files(i).name));
 end
 
-% Calculate the averages
+% Calculate the average FPS
 averageFPS = zeros(numberOfFiles, 1);
 for i=1:numberOfFiles
     total = 0;
@@ -57,7 +60,7 @@ newcolors = [0 0 0
 colororder(newcolors);
 
 for i=1:numberOfFiles
-    plot(x,filesData{i});
+    plot(x,filesData{i}, 'LineWidth',0.9);
     hold on;
 end
 
