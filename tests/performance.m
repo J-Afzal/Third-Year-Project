@@ -73,7 +73,11 @@ end
 xlabel('Frame Number');
 ylabel('Time to compute frame (ms)');
 axis tight;
-ylim([0 300]);
+if (strcmp(platform, 'Jetson Nano (4GB)'))
+    ylim([0 1300]);
+else
+    ylim([0 300]);
+end
 grid on;
 title(strcat('Frame times for ', {' '}, platform));
 if (strcmp(platform, 'Jetson Nano (4GB)'))

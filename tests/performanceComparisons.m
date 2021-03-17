@@ -114,7 +114,7 @@ end
 xlabel('Frame Number');
 ylabel('Time to compute frame (ms)');
 axis tight;
-ylim([0 300]);
+ylim([0 1300]);
 grid on;
 title('Frame times for all platforms');
 legend(' Windows 10 Desktop', ' Linux (Ubuntu 20.04) Desktop', ' Jetson Nano (4GB)', 'location','southoutside');

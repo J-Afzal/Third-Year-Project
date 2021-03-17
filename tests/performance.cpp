@@ -28,9 +28,11 @@ int main(void)
 	int numberOfTests = 21;
 	bool saveResults = false;
 	bool recordOuput = true;
-	std::string platform = "Windows 10 Desktop";
-	// std::string platform = "Linux (Ubuntu 20.04) Desktop";
-	// std::string platform = "Jetson Nano (4GB)";
+	int FPS = 30;
+	std::string outputVideoDir = "../tests/- Benchmark Videos/";
+	std::string platformDir = "../tests/Windows 10 Desktop/";
+	// std::string platform = "../tests/Linux (Ubuntu 20.04) Desktop/";
+	// std::string platform = "../tests/Jetson Nano (4GB)/";
 
 	int frameCount = 1155;
 
@@ -189,9 +191,7 @@ int main(void)
 
 	for (int i = 0; i < numberOfTests; i++)
 	{
-		std::string temp = "../tests/";
-		temp += platform;
-		temp += "/";
+		std::string temp = "";
 
 		if (yolo[i])
 		{
@@ -209,8 +209,6 @@ int main(void)
 		}
 		else
 			temp += "NoYOLOv4";
-
-		temp += "_ms.txt";
 
 		outputFileNames.push_back(temp);
 	}
@@ -233,7 +231,7 @@ int main(void)
 
 			if (recordOuput && iterations == 0)
 			{
-				frameVideo.open(outputFileNames[testNumber] + ".mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 5, cv::Size(1920, 1080), true);
+				frameVideo.open(outputVideoDir + outputFileNames[testNumber] + ".mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), FPS, cv::Size(1920, 1080), true);
 			}
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -336,7 +334,7 @@ int main(void)
 			// YOLO confidence threshold, non-maxima suppression threshold and number of
 			// objects that can be detected
 			int BLOB_SIZE = blobSize[testNumber];
-			constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.5;
+			constexpr double YOLO_CONFIDENCE_THRESHOLD = 0;
 			constexpr double YOLO_NMS_THRESHOLD = 0.4;
 			constexpr int BOUNDING_BOX_BUFFER = 5;
 
@@ -525,9 +523,14 @@ int main(void)
 								width = outputBlobs[i].at<float>(j, 2) * (double)VIDEO_WIDTH + BOUNDING_BOX_BUFFER;
 								height = outputBlobs[i].at<float>(j, 3) * (double)VIDEO_HEIGHT + BOUNDING_BOX_BUFFER;
 
-								preNMSObjectBoundingBoxes.push_back(cv::Rect(centerX - width / 2, centerY - height / 2, width, height));
-								preNMSObjectNames.push_back(modelIntsAndNames[classID.x]);
-								preNMSObjectConfidences.push_back(confidence);
+								// Remove object detections on the hood of car
+								if (centerY < ROI_BOTTOM_HEIGHT)
+								{
+									preNMSObjectBoundingBoxes.push_back(cv::Rect(centerX - width / 2, centerY - height / 2, width, height));
+									preNMSObjectNames.push_back(modelIntsAndNames[classID.x]);
+									preNMSObjectConfidences.push_back(confidence);
+
+								}
 							}
 						}
 					}
@@ -1103,7 +1106,7 @@ int main(void)
 				textSize = cv::getTextSize(FPSText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
 				baseline += FONT_THICKNESS;
 				textOrg = cv::Point(5, baseline + textSize.height);
-				cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+				cv::putText(ROIFrame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 
 				// Display the resulting frame
 				cv::imshow("frame", frame);
@@ -1133,7 +1136,7 @@ int main(void)
 		if (saveResults == true)
 		{
 			// save the results
-			std::ofstream results(outputFileNames[testNumber]);
+			std::ofstream results(platformDir + outputFileNames[testNumber]);
 			if (results.is_open())
 			{
 				for (int i = 0; i < frameCount; i++)
