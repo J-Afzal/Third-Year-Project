@@ -219,13 +219,15 @@ int main(void)
 
 
 
-	// Do this for the first frame
-	video >> frame;
-
-	while (!frame.empty())
+	while (1)
 	{
 		// Start the stop watch to measure the FPS
 		auto start = std::chrono::high_resolution_clock::now();
+
+		// Capture frame
+		video >> frame;
+		if (frame.empty())
+			break;
 
 
 
@@ -873,9 +875,6 @@ int main(void)
 
 		// Required to display the frame
 		cv::waitKey(1);
-
-		// Get next frame and
-		video >> frame;
 	}
 
 	// When everything done, release the video capture object

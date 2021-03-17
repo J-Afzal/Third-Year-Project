@@ -24,9 +24,11 @@ int main(void)
 	//
 	////////////////////////////////////////////////////
 
-	int numberOfRepetitions = 10;
+	int numberOfRepetitions = 1;
 	int numberOfTests = 21;
-	// std::string platform = "Windows 10 Desktop";
+	bool saveResults = false;
+	bool recordOuput = true;
+	std::string platform = "Windows 10 Desktop";
 	// std::string platform = "Linux (Ubuntu 20.04) Desktop";
 	// std::string platform = "Jetson Nano (4GB)";
 
@@ -213,6 +215,8 @@ int main(void)
 		outputFileNames.push_back(temp);
 	}
 
+	cv::VideoWriter frameVideo;
+
 	std::cout << "Tests to complete: " << numberOfTests;
 	std::cout << "\nNumber of repitions: " << numberOfRepetitions << '\n';
 
@@ -226,6 +230,11 @@ int main(void)
 			std::cout.flush();
 
 			std::vector<int> temp;
+
+			if (recordOuput && iterations == 0)
+			{
+				frameVideo.open(outputFileNames[testNumber] + ".mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 5, cv::Size(1920, 1080), true);
+			}
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -327,7 +336,7 @@ int main(void)
 			// YOLO confidence threshold, non-maxima suppression threshold and number of
 			// objects that can be detected
 			int BLOB_SIZE = blobSize[testNumber];
-			constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.67;
+			constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.5;
 			constexpr double YOLO_NMS_THRESHOLD = 0.4;
 			constexpr int BOUNDING_BOX_BUFFER = 5;
 
@@ -441,13 +450,17 @@ int main(void)
 
 
 
-			// Do this for the first frame
-			video >> frame;
-
-			while (!frame.empty())
+			while (1)
 			{
 				// Start the stop watch to measure the FPS
 				auto start = std::chrono::high_resolution_clock::now();
+
+
+
+				// Capture frame
+				video >> frame;
+				if (frame.empty())
+					break;
 
 
 
@@ -1098,14 +1111,16 @@ int main(void)
 				// Required to display the frame
 				cv::waitKey(1);
 
-				// Get next frame and
-				video >> frame;
-
 				temp.push_back(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count());
+
+				// Write the frame to a video file
+				if (recordOuput && iterations == 0)
+					frameVideo << frame;
 			}
 
-			// When everything done, release the video capture object
+			// When everything done, release the video capture objects
 			video.release();
+			frameVideo.release();
 
 			// Closes all the frames
 			cv::destroyAllWindows();
@@ -1115,20 +1130,23 @@ int main(void)
 			allIterations.push_back(temp);
 		}
 
-		// save the results
-		std::ofstream results(outputFileNames[testNumber]);
-		if (results.is_open())
+		if (saveResults == true)
 		{
-			for (int i = 0; i < frameCount; i++)
+			// save the results
+			std::ofstream results(outputFileNames[testNumber]);
+			if (results.is_open())
 			{
-				int temp = 0;
-
-				for (int j = 0; j < allIterations.size(); j++)
+				for (int i = 0; i < frameCount; i++)
 				{
-					temp += allIterations[j][i];
-				}
+					int temp = 0;
 
-				results << std::to_string(temp / (double)numberOfRepetitions) << '\n';
+					for (int j = 0; j < allIterations.size(); j++)
+					{
+						temp += allIterations[j][i];
+					}
+
+					results << std::to_string(temp / (double)numberOfRepetitions) << '\n';
+				}
 			}
 		}
 	}
