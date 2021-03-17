@@ -104,7 +104,7 @@ int main(void)
 	// YOLO confidence threshold, non-maxima suppression threshold and number of
 	// objects that can be detected
 	constexpr int BLOB_SIZE = 608;
-	constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.67;
+	constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.5;
 	constexpr double YOLO_NMS_THRESHOLD = 0.4;
 	constexpr int BOUNDING_BOX_BUFFER = 5;
 
@@ -324,9 +324,14 @@ int main(void)
 					width = outputBlobs[i].at<float>(j, 2) * (double)VIDEO_WIDTH + BOUNDING_BOX_BUFFER;
 					height = outputBlobs[i].at<float>(j, 3) * (double)VIDEO_HEIGHT + BOUNDING_BOX_BUFFER;
 
-					preNMSObjectBoundingBoxes.push_back(cv::Rect(centerX - width / 2, centerY - height / 2, width, height));
-					preNMSObjectNames.push_back(modelIntsAndNames[classID.x]);
-					preNMSObjectConfidences.push_back(confidence);
+					// Remove object detections on the hood of car
+					if (centerY < ROI_BOTTOM_HEIGHT)
+					{
+						preNMSObjectBoundingBoxes.push_back(cv::Rect(centerX - width / 2, centerY - height / 2, width, height));
+						preNMSObjectNames.push_back(modelIntsAndNames[classID.x]);
+						preNMSObjectConfidences.push_back(confidence);
+
+					}
 				}
 			}
 		}
