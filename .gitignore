@@ -1,10 +1,10 @@
 # MSVC projects
-Debug_Project/
-Release_Project/
-Test_Project/
-yolov4.weights
-0-Vertical.mp4
-0-Horizontal.mp4
+Project_Debug/
+Project_Release/
+Project_Tests/
+yolo/yolov4.weights
+vids/vertical.mp4
+vids/horizontal.mp4
 
 # Prerequisites
 *.d

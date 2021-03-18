@@ -1,3 +1,5 @@
+// @Author: Junaid Afzal
+
 #include <iostream>
 #include <fstream>
 #include <math.h>
@@ -11,9 +13,7 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	//cv::VideoCapture video("../0-Vertical.mp4");
-	//cv::VideoCapture video("../0-Horizontal.mp4");
-	cv::VideoCapture video("../0-Benchmark.mp4");
+	cv::VideoCapture video("../vids/benchmark.mp4");
 	//cv::VideoCapture video(0);
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
@@ -24,11 +24,11 @@ int main(void)
 	}
 
 	// Read in the coco names
-	// The std::map links model id with a string and a string with a colour
+	// The std::map links model ID with a string and a string with a colour
 	std::map<int, std::string> modelIntsAndNames;
 	std::map<std::string, cv::Scalar> modelNamesAndColourList;
-	std::ifstream modelNamesFile("../coco.names");
-	srand(0);
+	std::ifstream modelNamesFile("../yolo/coco.names");
+	srand(255);
 	if (modelNamesFile.is_open())
 	{
 		std::string line;
@@ -55,7 +55,7 @@ int main(void)
 	}
 
 	// Setup the YOLO CUDA OpenCV DNN
-	cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolov4.cfg", "../yolov4.weights");
+	cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4.cfg", "../yolo/yolov4.weights");
 	net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
 	net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
 	std::vector<std::string> unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
