@@ -17,9 +17,22 @@ int main(void)
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
 	// Check if camera opened successfully
-	if (!video.isOpened()) {
-		std::cout << "\nError opening video stream or file\n";
+	if (!video.isOpened())
+	{
+		std::cout << "\nError opening video capture object\n";
 		return -1;
+	}
+
+	// To record output of code
+	bool recordOuput = false;
+	cv::VideoWriter ouputVideo("../performance/IRL Test/Bonnet Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+	//cv::VideoWriter ouputVideo("../IRL Test/Bonnet SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+	//cv::VideoWriter ouputVideo("../IRL Test/Roof Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+	//cv::VideoWriter ouputVideo("../IRL Test/Roof SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+	if (!ouputVideo.isOpened())
+	{
+		std::cout << "\nError opening video writer object\n";
+		return -2;
 	}
 
 	// Read in the coco names
@@ -36,22 +49,22 @@ int main(void)
 			#ifdef __linux__
 			line.pop_back();
 			#endif
-			modelNamesAndColourList.insert(std::pair<std::string, cv::Scalar>(line, cv::Scalar(rand() % 256, rand() % 256, rand() % 256)));
+			modelNamesAndColourList.insert(std::pair<std::string, cv::Scalar>(line, cv::Scalar(255, 255, 255))); // white
 			modelIntsAndNames.insert(std::pair<int, std::string>(i, line));
 		}
 
 		// Set these as custom colours
-		modelNamesAndColourList["car"] = cv::Scalar(255, 64, 64);           // blue
-		modelNamesAndColourList["truck"] = cv::Scalar(255, 0, 255);         // red
-		modelNamesAndColourList["bus"] = cv::Scalar(255, 255, 255);         // white
-		modelNamesAndColourList["traffic light"] = cv::Scalar(0, 0, 255);   // greeny
+		modelNamesAndColourList["car"] = cv::Scalar(255, 64, 64);				// blue
+		modelNamesAndColourList["truck"] = cv::Scalar(255, 64, 255);			// purple
+		modelNamesAndColourList["bus"] = cv::Scalar(64, 64, 255);				// red
+		modelNamesAndColourList["traffic light"] = cv::Scalar(64, 255, 255);	// yellow
 
 		modelNamesFile.close();
 	}
 	else
 	{
 		std::cout << "\nError opening coco.names file stream or file\n";
-		return -2;
+		return -3;
 	}
 
 	// Setup the YOLO CUDA OpenCV DNN
@@ -128,7 +141,7 @@ int main(void)
 	std::string trafficLightState;
 
 	// Mat objects
-	cv::Mat frame, blobFromImg, ROIFrame, cannyFrame, blankFrame;
+	cv::Mat frame, unEditedFrame, blobFromImg, ROIFrame, cannyFrame, blankFrame;
 
 	// rolling averages
 	rollingAverage horizontalLineStateRollingAverage(HORIZONTAL_LINE_STATE_ROLLING_AVERAGE, 2);
@@ -227,7 +240,7 @@ int main(void)
 		video >> frame;
 		if (frame.empty())
 			break;
-
+		unEditedFrame = frame.clone();
 
 
 		// Clear variables that are not over-written but instead added to
@@ -332,8 +345,8 @@ int main(void)
 				dstTrafficLight.push_back(cv::Point2f(0, 200));
 				dstTrafficLight.push_back(cv::Point2f(100, 200));
 
-				// To warp perspective to only contain traffic light
-				cv::warpPerspective(frame, warpedimage, cv::getPerspectiveTransform(srcTrafficLight, dstTrafficLight, 0), cv::Size(100, 200));
+				// To warp perspective to only contain traffic light but only on the un-edited frame so no bounding boxes shown
+				cv::warpPerspective(unEditedFrame, warpedimage, cv::getPerspectiveTransform(srcTrafficLight, dstTrafficLight, 0), cv::Size(100, 200));
 
 				// count the number of green pixels
 				cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
@@ -345,9 +358,9 @@ int main(void)
 				cv::inRange(ImageInHSV, cv::Scalar(0, 64, 64), cv::Scalar(10, 255, 255), ImageInHSV);
 				NonZeroPixelsInRed = cv::countNonZero(ImageInHSV);
 
-				if (NonZeroPixelsInGreen > NonZeroPixelsInRed)
+				if ((NonZeroPixelsInGreen > NonZeroPixelsInRed) && (NonZeroPixelsInGreen > 1000))
 					trafficLightState = " (Green)";
-				else //(NonZeroPixelsInRed > NonZeroPixelsInGreen)
+				else if ((NonZeroPixelsInRed > NonZeroPixelsInGreen) && (NonZeroPixelsInRed > 1000))
 					trafficLightState = " (Red)";
 			}
 
@@ -879,10 +892,14 @@ int main(void)
 
 		// Required to display the frame
 		cv::waitKey(1);
+
+		if (recordOuput)
+			ouputVideo << frame;
 	}
 
 	// When everything done, release the video capture object
 	video.release();
+	ouputVideo.release();
 
 	// Closes all the frames
 	cv::destroyAllWindows();
