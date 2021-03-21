@@ -24,15 +24,20 @@ int main(void)
 	}
 
 	// To record output of code
-	bool recordOuput = false;
-	cv::VideoWriter ouputVideo("../performance/IRL Test/Bonnet Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-	//cv::VideoWriter ouputVideo("../IRL Test/Bonnet SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-	//cv::VideoWriter ouputVideo("../IRL Test/Roof Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-	//cv::VideoWriter ouputVideo("../IRL Test/Roof SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-	if (!ouputVideo.isOpened())
+	bool recordOuput = true;
+	cv::VideoWriter ouputVideo;
+	if (recordOuput)
 	{
-		std::cout << "\nError opening video writer object\n";
-		return -2;
+		ouputVideo.open("../performance/IRL Test/Bonnet Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+		//ouputVideo.open("../IRL Test/Bonnet SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+		//ouputVideo.open("../IRL Test/Roof Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+		//ouputVideo.open("../IRL Test/Roof SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+		
+		if (!ouputVideo.isOpened())
+		{
+			std::cout << "\nError opening video writer object\n";
+			return -2;
+		}
 	}
 
 	// Read in the coco names
@@ -890,11 +895,12 @@ int main(void)
 		// Display the resulting frame
 		cv::imshow("frame", frame);
 
-		// Required to display the frame
-		cv::waitKey(1);
-
 		if (recordOuput)
 			ouputVideo << frame;
+
+		// Required to display the frame
+		if (cv::waitKey(1) == 'q')
+			break;
 	}
 
 	// When everything done, release the video capture object
