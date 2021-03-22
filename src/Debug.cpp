@@ -15,7 +15,6 @@ int main(void)
 	// Create a VideoCapture object and open the input video file
 	// cv::VideoCapture video("../vids/benchmark.mp4");
 	cv::VideoCapture video(0);
-	//cv::VideoCapture video(0);
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
 	// Check if camera opened successfully
