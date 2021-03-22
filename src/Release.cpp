@@ -13,7 +13,8 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	cv::VideoCapture video("../vids/benchmark.mp4");
+	// cv::VideoCapture video("../vids/benchmark.mp4");
+	cv::VideoCapture video(0);
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
 	// Check if camera opened successfully
@@ -32,7 +33,7 @@ int main(void)
 		//ouputVideo.open("../IRL Test/Bonnet SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
 		//ouputVideo.open("../IRL Test/Roof Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
 		//ouputVideo.open("../IRL Test/Roof SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-		
+
 		if (!ouputVideo.isOpened())
 		{
 			std::cout << "\nError opening video writer object\n";
@@ -73,7 +74,7 @@ int main(void)
 	}
 
 	// Setup the YOLO CUDA OpenCV DNN
-	cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4.cfg", "../yolo/yolov4.weights");
+	cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4-tiny.cfg", "../yolo/yolov4-tiny.weights");
 	net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
 	net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
 	std::vector<std::string> unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
@@ -121,7 +122,7 @@ int main(void)
 
 	// YOLO confidence threshold, non-maxima suppression threshold and number of
 	// objects that can be detected
-	constexpr int BLOB_SIZE = 608;
+	constexpr int BLOB_SIZE = 320;
 	constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.5;
 	constexpr double YOLO_NMS_THRESHOLD = 0.4;
 	constexpr int BOUNDING_BOX_BUFFER = 5;
