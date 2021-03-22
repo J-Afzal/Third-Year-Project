@@ -13,7 +13,7 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	// cv::VideoCapture video("../vids/benchmark.mp4");
+	//cv::VideoCapture video("../vids/benchmark.mp4");
 	cv::VideoCapture video(0);
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
@@ -235,7 +235,7 @@ int main(void)
 	// Misc
 	int i, j;
 
-
+	
 
 	while (1)
 	{
@@ -524,7 +524,7 @@ int main(void)
 
 		// If above certain length solid if not dashed if neither then no line detected
 		// this value is then inputted to the rolling average
-		if (isinf(leftLineAverageSize))
+		if (leftLines.size() == 0)
 			leftLineType = leftLineTypeRollingAverage.calculateRollingAverage(0);
 		else if (leftLineAverageSize < SOLID_LINE_LENGTH_THRESHOLD)
 			leftLineType = leftLineTypeRollingAverage.calculateRollingAverage(1);
@@ -533,7 +533,7 @@ int main(void)
 
 		// If above certain length solid if not dashed if neither then no line detected
 		// this value is then inputted to the rolling average
-		if (isinf(middleLineAverageSize))
+		if (middleLines.size() == 0)
 			middleLineType = middleLineTypeRollingAverage.calculateRollingAverage(0);
 		else if (middleLineAverageSize < SOLID_LINE_LENGTH_THRESHOLD)
 			middleLineType = middleLineTypeRollingAverage.calculateRollingAverage(1);
@@ -542,7 +542,7 @@ int main(void)
 
 		// If above certain length solid if not dashed if neither then no line detected
 		// this value is then inputted to the rolling average
-		if (isinf(rightLineAverageSize))
+		if (rightLines.size() == 0)
 			rightLineType = rightLineTypeRollingAverage.calculateRollingAverage(0);
 		else if (rightLineAverageSize < SOLID_LINE_LENGTH_THRESHOLD)
 			rightLineType = rightLineTypeRollingAverage.calculateRollingAverage(1);
@@ -893,11 +893,13 @@ int main(void)
 		textOrg = cv::Point(5, baseline + textSize.height);
 		cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 
-		// Display the resulting frame
-		cv::imshow("frame", frame);
-
+		// write the frame to video file
 		if (recordOuput)
 			ouputVideo << frame;
+
+		// Display the resulting frame
+		//cv::resize(frame, frame, cv::Size())
+		cv::imshow("frame", frame);
 
 		// Required to display the frame
 		if (cv::waitKey(1) == 'q')
