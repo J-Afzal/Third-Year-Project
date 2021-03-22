@@ -13,14 +13,32 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	// cv::VideoCapture video("../vids/benchmark.mp4");
-	cv::VideoCapture video(0);
+	cv::VideoCapture video("../vids/benchmark.mp4");
+	//cv::VideoCapture video(0);
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
 	// Check if camera opened successfully
-	if (!video.isOpened()) {
-		std::cout << "\nError opening video stream or file\n";
+	if (!video.isOpened())
+	{
+		std::cout << "\nError opening video capture object\n";
 		return -1;
+	}
+
+	// To record output of code
+	bool recordOuput = false;
+	cv::VideoWriter ouputVideo;
+	if (recordOuput)
+	{
+		ouputVideo.open("../performance/IRL Test/Bonnet Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+		//ouputVideo.open("../IRL Test/Bonnet SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+		//ouputVideo.open("../IRL Test/Roof Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+		//ouputVideo.open("../IRL Test/Roof SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+
+		if (!ouputVideo.isOpened())
+		{
+			std::cout << "\nError opening video writer object\n";
+			return -2;
+		}
 	}
 
 	// Read in the coco names
@@ -36,22 +54,23 @@ int main(void)
 		{
 			#ifdef __linux__
 			line.pop_back();
-			#endif			modelNamesAndColourList.insert(std::pair<std::string, cv::Scalar>(line, cv::Scalar(rand() % 256, rand() % 256, rand() % 256)));
+			#endif
+			modelNamesAndColourList.insert(std::pair<std::string, cv::Scalar>(line, cv::Scalar(255, 255, 255))); // white
 			modelIntsAndNames.insert(std::pair<int, std::string>(i, line));
 		}
 
 		// Set these as custom colours
-		modelNamesAndColourList["car"] = cv::Scalar(255, 64, 64);           // blue
-		modelNamesAndColourList["truck"] = cv::Scalar(255, 0, 255);         // red
-		modelNamesAndColourList["bus"] = cv::Scalar(255, 255, 255);         // white
-		modelNamesAndColourList["traffic light"] = cv::Scalar(0, 0, 255);   // greeny
+		modelNamesAndColourList["car"] = cv::Scalar(255, 64, 64);				// blue
+		modelNamesAndColourList["truck"] = cv::Scalar(255, 64, 255);			// purple
+		modelNamesAndColourList["bus"] = cv::Scalar(64, 64, 255);				// red
+		modelNamesAndColourList["traffic light"] = cv::Scalar(64, 255, 255);	// yellow
 
 		modelNamesFile.close();
 	}
 	else
 	{
 		std::cout << "\nError opening coco.names file stream or file\n";
-		return -2;
+		return -3;
 	}
 
 	// Setup the YOLO CUDA OpenCV DNN
@@ -104,7 +123,7 @@ int main(void)
 	// YOLO confidence threshold, non-maxima suppression threshold and number of
 	// objects that can be detected
 	constexpr int BLOB_SIZE = 320;
-	constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.5;
+	constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.4;
 	constexpr double YOLO_NMS_THRESHOLD = 0.4;
 	constexpr int BOUNDING_BOX_BUFFER = 5;
 
@@ -128,7 +147,7 @@ int main(void)
 	std::string trafficLightState;
 
 	// Mat objects
-	cv::Mat frame, blobFromImg, ROIFrame, cannyFrame, houghFrame, blankFrame;
+	cv::Mat frame, unEditedFrame, blobFromImg, ROIFrame, cannyFrame, houghFrame, blankFrame;
 
 	// rolling averages
 	rollingAverage horizontalLineStateRollingAverage(HORIZONTAL_LINE_STATE_ROLLING_AVERAGE, 2);
@@ -226,7 +245,7 @@ int main(void)
 		video >> frame;
 		if (frame.empty())
 			break;
-
+		unEditedFrame = frame.clone();
 
 
 		// Clear variables that are not over-written but instead added to
@@ -241,6 +260,7 @@ int main(void)
 		middleLines.clear();
 		rightLines.clear();
 		lanePoints.clear();
+		maskDimensions.clear();
 
 
 
@@ -367,7 +387,7 @@ int main(void)
 				dstTrafficLight.push_back(cv::Point2f(100, 200));
 
 				// To warp perspective to only contain traffic light
-				cv::warpPerspective(frame, warpedimage, cv::getPerspectiveTransform(srcTrafficLight, dstTrafficLight, 0), cv::Size(100, 200));
+				cv::warpPerspective(unEditedFrame, warpedimage, cv::getPerspectiveTransform(srcTrafficLight, dstTrafficLight, 0), cv::Size(100, 200));
 
 				// count the number of green pixels
 				cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
@@ -379,9 +399,9 @@ int main(void)
 				cv::inRange(ImageInHSV, cv::Scalar(0, 64, 64), cv::Scalar(10, 255, 255), ImageInHSV);
 				NonZeroPixelsInRed = cv::countNonZero(ImageInHSV);
 
-				if (NonZeroPixelsInGreen > NonZeroPixelsInRed)
+				if ((NonZeroPixelsInGreen > NonZeroPixelsInRed) && (NonZeroPixelsInGreen > 1000))
 					trafficLightState = " (Green)";
-				else //(NonZeroPixelsInRed > NonZeroPixelsInGreen)
+				else if ((NonZeroPixelsInRed > NonZeroPixelsInGreen) && (NonZeroPixelsInRed > 1000))
 					trafficLightState = " (Red)";
 			}
 
@@ -735,21 +755,32 @@ int main(void)
 				else
 					minY = rightMinY;
 
-				// Make blank frame a blank black frame
-				blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
+				// To prevent hour glass error, detect y value that lines intersect and if within overlay
+				// region then skip printing overlay to screen as is error. This done by the following equation:
+				//
+				// y = (m2*c1 - m1*c2) / (m2-m1)
+				//
+				// where m1 and c1 are left lane edge and m2 and c2 are right lane edge
+				int intersectionY = (mRightLaneEdge*cLeftLaneEdge - mLeftLaneEdge*cRightLaneEdge) / (mRightLaneEdge - mLeftLaneEdge);
 
-				// Add the four points of the quadrangle
-				lanePoints.push_back(cv::Point((minY - cLeftLaneEdge) / mLeftLaneEdge, minY));
-				lanePoints.push_back(cv::Point((minY - cRightLaneEdge) / mRightLaneEdge, minY));
-				lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cRightLaneEdge) / mRightLaneEdge, ROI_BOTTOM_HEIGHT));
-				lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cLeftLaneEdge) / mLeftLaneEdge, ROI_BOTTOM_HEIGHT));
+				if (intersectionY < minY)
+				{
+					// Make blank frame a blank black frame
+					blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
 
-				cv::fillConvexPoly(blankFrame, lanePoints, cv::Scalar(0, 64, 0), cv::LINE_AA, 0);
+					// Add the four points of the quadrangle
+					lanePoints.push_back(cv::Point((minY - cLeftLaneEdge) / mLeftLaneEdge, minY));
+					lanePoints.push_back(cv::Point((minY - cRightLaneEdge) / mRightLaneEdge, minY));
+					lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cRightLaneEdge) / mRightLaneEdge, ROI_BOTTOM_HEIGHT));
+					lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cLeftLaneEdge) / mLeftLaneEdge, ROI_BOTTOM_HEIGHT));
 
-				// Can simply add the two images as the background in blankFrame
-				// is black (0,0,0) and so will not affect the frame image
-				// while still being able to see tarmac
-				cv::add(frame, blankFrame, frame);
+					cv::fillConvexPoly(blankFrame, lanePoints, cv::Scalar(0, 64, 0), cv::LINE_AA, 0);
+
+					// Can simply add the two images as the background in blankFrame
+					// is black (0,0,0) and so will not affect the frame image
+					// while still being able to see tarmac
+					cv::add(frame, blankFrame, frame);
+				}
 			}
 
 			// Write the turning needed to the screen
@@ -928,8 +959,8 @@ int main(void)
 
 		// Display the resulting frame
 		cv::imshow("ROIFrame", ROIFrame);
-		cv::imshow("cannyFrame", cannyFrame);
-		cv::imshow("houghFrame", houghFrame);
+		//cv::imshow("cannyFrame", cannyFrame);
+		//cv::imshow("houghFrame", houghFrame);
 		cv::imshow("frame", frame);
 
 

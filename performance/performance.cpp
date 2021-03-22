@@ -34,7 +34,7 @@ int main(void)
 	//std::string platform = "../tests/Linux (Ubuntu 20.04) Desktop/";
 	//std::string platform = "../tests/Jetson Nano (4GB)/";
 
-	bool saveResults = true;
+	bool saveResults = false;
 
 	bool recordOuput = false;
 	int OuputFPS = 30;
@@ -245,12 +245,31 @@ int main(void)
 
 			// Create a VideoCapture object and open the input video file
 			cv::VideoCapture video("../vids/benchmark.mp4");
+			//cv::VideoCapture video(0);
 			video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 			video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
 			// Check if camera opened successfully
-			if (!video.isOpened()) {
-				std::cout << "\nError opening video stream or file\n";
+			if (!video.isOpened())
+			{
+				std::cout << "\nError opening video capture object\n";
 				return -1;
+			}
+
+			// To record output of code
+			bool recordOuput = false;
+			cv::VideoWriter ouputVideo;
+			if (recordOuput)
+			{
+				ouputVideo.open("../performance/IRL Test/Bonnet Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+				//ouputVideo.open("../IRL Test/Bonnet SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+				//ouputVideo.open("../IRL Test/Roof Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+				//ouputVideo.open("../IRL Test/Roof SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+
+				if (!ouputVideo.isOpened())
+				{
+					std::cout << "\nError opening video writer object\n";
+					return -2;
+				}
 			}
 
 			// Read in the coco names
@@ -267,35 +286,29 @@ int main(void)
 					#ifdef __linux__
 					line.pop_back();
 					#endif
-					modelNamesAndColourList.insert(std::pair<std::string, cv::Scalar>(line, cv::Scalar(rand() % 256, rand() % 256, rand() % 256)));
+					modelNamesAndColourList.insert(std::pair<std::string, cv::Scalar>(line, cv::Scalar(255, 255, 255))); // white
 					modelIntsAndNames.insert(std::pair<int, std::string>(i, line));
 				}
 
 				// Set these as custom colours
-				modelNamesAndColourList["car"] = cv::Scalar(255, 64, 64);           // blue
-				modelNamesAndColourList["truck"] = cv::Scalar(255, 0, 255);         // red
-				modelNamesAndColourList["bus"] = cv::Scalar(255, 255, 255);         // white
-				modelNamesAndColourList["traffic light"] = cv::Scalar(0, 0, 255);   // greeny
+				modelNamesAndColourList["car"] = cv::Scalar(255, 64, 64);				// blue
+				modelNamesAndColourList["truck"] = cv::Scalar(255, 64, 255);			// purple
+				modelNamesAndColourList["bus"] = cv::Scalar(64, 64, 255);				// red
+				modelNamesAndColourList["traffic light"] = cv::Scalar(64, 255, 255);	// yellow
 
 				modelNamesFile.close();
 			}
 			else
 			{
 				std::cout << "\nError opening coco.names file stream or file\n";
-				return -2;
+				return -3;
 			}
 
-
-			cv::dnn::Net net;
-			std::vector<std::string> unconnectedOutLayersNames;
-			if (yolo[testNumber])
-			{
-				// Setup the YOLO CUDA OpenCV DNN
-				net = cv::dnn::readNetFromDarknet(yoloTypeConfig[testNumber], yoloTypeWeights[testNumber]);
-				net.setPreferableBackend(dnnBackend[testNumber]);
-				net.setPreferableTarget(dnnTarget[testNumber]);
-				unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
-			}
+			// Setup the YOLO CUDA OpenCV DNN
+			cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4-tiny.cfg", "../yolo/yolov4-tiny.weights");
+			net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
+			net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
+			std::vector<std::string> unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
 
 
 
@@ -340,8 +353,8 @@ int main(void)
 
 			// YOLO confidence threshold, non-maxima suppression threshold and number of
 			// objects that can be detected
-			int BLOB_SIZE = blobSize[testNumber];
-			constexpr double YOLO_CONFIDENCE_THRESHOLD = 0;
+			constexpr int BLOB_SIZE = 320;
+			constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.4;
 			constexpr double YOLO_NMS_THRESHOLD = 0.4;
 			constexpr int BOUNDING_BOX_BUFFER = 5;
 
@@ -349,6 +362,8 @@ int main(void)
 			constexpr int FONT_FACE = cv::FONT_HERSHEY_DUPLEX;
 			constexpr double FONT_SCALE = 1;
 			constexpr int FONT_THICKNESS = 1;
+
+
 
 
 
@@ -363,7 +378,7 @@ int main(void)
 			std::string trafficLightState;
 
 			// Mat objects
-			cv::Mat frame, blobFromImg, ROIFrame, cannyFrame, blankFrame;
+			cv::Mat frame, unEditedFrame, blobFromImg, ROIFrame, cannyFrame, blankFrame;
 
 			// rolling averages
 			rollingAverage horizontalLineStateRollingAverage(HORIZONTAL_LINE_STATE_ROLLING_AVERAGE, 2);
@@ -458,13 +473,11 @@ int main(void)
 				// Start the stop watch to measure the FPS
 				auto start = std::chrono::high_resolution_clock::now();
 
-
-
 				// Capture frame
 				video >> frame;
 				if (frame.empty())
 					break;
-
+				unEditedFrame = frame.clone();
 
 
 				// Clear variables that are not over-written but instead added to
@@ -499,112 +512,110 @@ int main(void)
 				cv::HoughLinesP(cannyFrame, houghLines, 1, CV_PI / 180, HOUGHP_THRESHOLD, HOUGHP_MIN_LINE_LENGTH, HOUGHP_MAX_LINE_GAP);
 
 
-				if (yolo[testNumber])
+
+				// YOLO Detection for object bounding boxes as they are used in Hough line analysis
+				cv::dnn::blobFromImage(frame, blobFromImg, 1 / 255.0, cv::Size(BLOB_SIZE, BLOB_SIZE), cv::Scalar(0), true, false, CV_32F);
+				net.setInput(blobFromImg);
+				net.forward(outputBlobs, unconnectedOutLayersNames);
+
+				// Go through all output blobs and only allow those with confidence above threshold
+				for (i = 0; i < outputBlobs.size(); i++)
 				{
-					// YOLO Detection for object bounding boxes as they are used in Hough line analysis
-					cv::dnn::blobFromImage(frame, blobFromImg, 1 / 255.0, cv::Size(BLOB_SIZE, BLOB_SIZE), cv::Scalar(0), true, false, CV_32F);
-					net.setInput(blobFromImg);
-					net.forward(outputBlobs, unconnectedOutLayersNames);
-
-					// Go through all output blobs and only allow those with confidence above threshold
-					for (i = 0; i < outputBlobs.size(); i++)
+					for (j = 0; j < outputBlobs[i].rows; j++)
 					{
-						for (j = 0; j < outputBlobs[i].rows; j++)
+						// rows represent number/ID of the detected objects (proposed region)
+						// so loop over number/ID of detected objects.
+
+						// for each row, the score is from element 5 up
+						// to number of classes index (5 - N columns)
+						// [x, y, w, h, confidence for class 1, confidence for class 2, ...]
+						// minMacLoc gives the max value and its location, i.e. its classID
+						cv::minMaxLoc(outputBlobs[i].row(j).colRange(5, outputBlobs[i].cols), NULL, &confidence, NULL, &classID);
+
+						if (confidence > YOLO_CONFIDENCE_THRESHOLD)
 						{
-							// rows represent number/ID of the detected objects (proposed region)
-							// so loop over number/ID of detected objects.
+							// Get the four int values from output blob for bounding box
+							centerX = outputBlobs[i].at<float>(j, 0) * (double)VIDEO_WIDTH;
+							centerY = outputBlobs[i].at<float>(j, 1) * (double)VIDEO_HEIGHT;
+							width = outputBlobs[i].at<float>(j, 2) * (double)VIDEO_WIDTH + BOUNDING_BOX_BUFFER;
+							height = outputBlobs[i].at<float>(j, 3) * (double)VIDEO_HEIGHT + BOUNDING_BOX_BUFFER;
 
-							// for each row, the score is from element 5 up
-							// to number of classes index (5 - N columns)
-							// [x, y, w, h, confidence for class 1, confidence for class 2, ...]
-							// minMacLoc gives the max value and its location, i.e. its classID
-							cv::minMaxLoc(outputBlobs[i].row(j).colRange(5, outputBlobs[i].cols), NULL, &confidence, NULL, &classID);
-
-							if (confidence > YOLO_CONFIDENCE_THRESHOLD)
+							// Remove object detections on the hood of car
+							if (centerY < ROI_BOTTOM_HEIGHT)
 							{
-								// Get the four int values from output blob for bounding box
-								centerX = outputBlobs[i].at<float>(j, 0) * (double)VIDEO_WIDTH;
-								centerY = outputBlobs[i].at<float>(j, 1) * (double)VIDEO_HEIGHT;
-								width = outputBlobs[i].at<float>(j, 2) * (double)VIDEO_WIDTH + BOUNDING_BOX_BUFFER;
-								height = outputBlobs[i].at<float>(j, 3) * (double)VIDEO_HEIGHT + BOUNDING_BOX_BUFFER;
+								preNMSObjectBoundingBoxes.push_back(cv::Rect(centerX - width / 2, centerY - height / 2, width, height));
+								preNMSObjectNames.push_back(modelIntsAndNames[classID.x]);
+								preNMSObjectConfidences.push_back(confidence);
 
-								// Remove object detections on the hood of car
-								if (centerY < ROI_BOTTOM_HEIGHT)
-								{
-									preNMSObjectBoundingBoxes.push_back(cv::Rect(centerX - width / 2, centerY - height / 2, width, height));
-									preNMSObjectNames.push_back(modelIntsAndNames[classID.x]);
-									preNMSObjectConfidences.push_back(confidence);
-
-								}
 							}
 						}
 					}
+				}
 
-					// Apply non-maxima suppression to supress overlapping bounding boxes
-					// For objects that overlap, the highest confidence object will be chosen
-					cv::dnn::NMSBoxes(preNMSObjectBoundingBoxes, preNMSObjectConfidences, 0.0, YOLO_NMS_THRESHOLD, indicesAfterNMS);
+				// Apply non-maxima suppression to supress overlapping bounding boxes
+				// For objects that overlap, the highest confidence object will be chosen
+				cv::dnn::NMSBoxes(preNMSObjectBoundingBoxes, preNMSObjectConfidences, 0.0, YOLO_NMS_THRESHOLD, indicesAfterNMS);
 
-					// boundingBoxes.size() = classIDs.size() = confidences.size()
-					// Expect only the objects that dont overlap
-					for (i = 0; i < indicesAfterNMS.size(); i++)
+				// boundingBoxes.size() = classIDs.size() = confidences.size()
+				// Expect only the objects that dont overlap
+				for (i = 0; i < indicesAfterNMS.size(); i++)
+				{
+					objectBoundingBoxes.push_back(preNMSObjectBoundingBoxes[indicesAfterNMS[i]]);
+					objectNames.push_back(preNMSObjectNames[indicesAfterNMS[i]]);
+					objectConfidences.push_back(preNMSObjectConfidences[indicesAfterNMS[i]]);
+
+					// Print object bounding boxes, object names and object confidences to the frame
+					// This happens first so that the bounding boxes do not go over the UI
+					trafficLightState = "";
+
+					if (objectNames.back() == "traffic light")
 					{
-						objectBoundingBoxes.push_back(preNMSObjectBoundingBoxes[indicesAfterNMS[i]]);
-						objectNames.push_back(preNMSObjectNames[indicesAfterNMS[i]]);
-						objectConfidences.push_back(preNMSObjectConfidences[indicesAfterNMS[i]]);
+						srcTrafficLight.clear();
+						srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y));
+						srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x + objectBoundingBoxes.back().width, objectBoundingBoxes.back().y));
+						srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y + objectBoundingBoxes.back().height));
+						srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x + objectBoundingBoxes.back().width, objectBoundingBoxes.back().y + objectBoundingBoxes.back().height));
 
-						// Print object bounding boxes, object names and object confidences to the frame
-						// This happens first so that the bounding boxes do not go over the UI
-						trafficLightState = "";
+						dstTrafficLight.clear();
+						dstTrafficLight.push_back(cv::Point2f(0, 0));
+						dstTrafficLight.push_back(cv::Point2f(100, 0));
+						dstTrafficLight.push_back(cv::Point2f(0, 200));
+						dstTrafficLight.push_back(cv::Point2f(100, 200));
 
-						if (objectNames.back() == "traffic light")
-						{
-							srcTrafficLight.clear();
-							srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y));
-							srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x + objectBoundingBoxes.back().width, objectBoundingBoxes.back().y));
-							srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y + objectBoundingBoxes.back().height));
-							srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x + objectBoundingBoxes.back().width, objectBoundingBoxes.back().y + objectBoundingBoxes.back().height));
+						// To warp perspective to only contain traffic light but only on the un-edited frame so no bounding boxes shown
+						cv::warpPerspective(unEditedFrame, warpedimage, cv::getPerspectiveTransform(srcTrafficLight, dstTrafficLight, 0), cv::Size(100, 200));
 
-							dstTrafficLight.clear();
-							dstTrafficLight.push_back(cv::Point2f(0, 0));
-							dstTrafficLight.push_back(cv::Point2f(100, 0));
-							dstTrafficLight.push_back(cv::Point2f(0, 200));
-							dstTrafficLight.push_back(cv::Point2f(100, 200));
+						// count the number of green pixels
+						cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
+						cv::inRange(ImageInHSV, cv::Scalar(32, 32, 32), cv::Scalar(80, 255, 255), ImageInHSV);
+						NonZeroPixelsInGreen = cv::countNonZero(ImageInHSV);
 
-							// To warp perspective to only contain traffic light
-							cv::warpPerspective(frame, warpedimage, cv::getPerspectiveTransform(srcTrafficLight, dstTrafficLight, 0), cv::Size(100, 200));
+						// count the number of red pixels
+						cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
+						cv::inRange(ImageInHSV, cv::Scalar(0, 64, 64), cv::Scalar(10, 255, 255), ImageInHSV);
+						NonZeroPixelsInRed = cv::countNonZero(ImageInHSV);
 
-							// count the number of green pixels
-							cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
-							cv::inRange(ImageInHSV, cv::Scalar(32, 32, 32), cv::Scalar(80, 255, 255), ImageInHSV);
-							NonZeroPixelsInGreen = cv::countNonZero(ImageInHSV);
-
-							// count the number of red pixels
-							cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
-							cv::inRange(ImageInHSV, cv::Scalar(0, 64, 64), cv::Scalar(10, 255, 255), ImageInHSV);
-							NonZeroPixelsInRed = cv::countNonZero(ImageInHSV);
-
-							if (NonZeroPixelsInGreen > NonZeroPixelsInRed)
-								trafficLightState = " (Green)";
-							else //(NonZeroPixelsInRed > NonZeroPixelsInGreen)
-								trafficLightState = " (Red)";
-						}
-
-						// Draw rectangle around detected object with the correct colour
-						cv::rectangle(frame, objectBoundingBoxes.back(), modelNamesAndColourList[objectNames.back()], 1, cv::LINE_AA);
-
-						// Construct the correct name of object with confidence
-						std::string name = objectNames.back() + ": " + std::to_string((int)(100 * objectConfidences.back())) + "%" + trafficLightState;
-						int size;
-						// This auto adjusts the background box to be the same size as 'name' expect
-						// if name is smaller than object rectangle width, where it will be the same
-						// size as object rectangle width
-						if (objectBoundingBoxes.back().width > name.size() * 9)
-							size = objectBoundingBoxes.back().width;
-						else
-							size = name.size() * 9;
-						cv::rectangle(frame, cv::Rect(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 15, size, 15), modelNamesAndColourList[objectNames.back()], cv::FILLED, cv::LINE_AA);
-						cv::putText(frame, name, cv::Point(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 2), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0), 1, cv::LINE_AA);
+						if ((NonZeroPixelsInGreen > NonZeroPixelsInRed) && (NonZeroPixelsInGreen > 1000))
+							trafficLightState = " (Green)";
+						else if ((NonZeroPixelsInRed > NonZeroPixelsInGreen) && (NonZeroPixelsInRed > 1000))
+							trafficLightState = " (Red)";
 					}
+
+					// Draw rectangle around detected object with the correct colour
+					cv::rectangle(frame, objectBoundingBoxes.back(), modelNamesAndColourList[objectNames.back()], 1, cv::LINE_AA);
+
+					// Construct the correct name of object with confidence
+					std::string name = objectNames.back() + ": " + std::to_string((int)(100 * objectConfidences.back())) + "%" + trafficLightState;
+					int size;
+					// This auto adjusts the background box to be the same size as 'name' expect
+					// if name is smaller than object rectangle width, where it will be the same
+					// size as object rectangle width
+					if (objectBoundingBoxes.back().width > name.size() * 9)
+						size = objectBoundingBoxes.back().width;
+					else
+						size = name.size() * 9;
+					cv::rectangle(frame, cv::Rect(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 15, size, 15), modelNamesAndColourList[objectNames.back()], cv::FILLED, cv::LINE_AA);
+					cv::putText(frame, name, cv::Point(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 2), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0), 1, cv::LINE_AA);
 				}
 
 
@@ -744,7 +755,7 @@ int main(void)
 
 				// If above certain length solid if not dashed if neither then no line detected
 				// this value is then inputted to the rolling average
-				if (isinf(leftLineAverageSize))
+				if (leftLines.size() == 0)
 					leftLineType = leftLineTypeRollingAverage.calculateRollingAverage(0);
 				else if (leftLineAverageSize < SOLID_LINE_LENGTH_THRESHOLD)
 					leftLineType = leftLineTypeRollingAverage.calculateRollingAverage(1);
@@ -753,7 +764,7 @@ int main(void)
 
 				// If above certain length solid if not dashed if neither then no line detected
 				// this value is then inputted to the rolling average
-				if (isinf(middleLineAverageSize))
+				if (middleLines.size() == 0)
 					middleLineType = middleLineTypeRollingAverage.calculateRollingAverage(0);
 				else if (middleLineAverageSize < SOLID_LINE_LENGTH_THRESHOLD)
 					middleLineType = middleLineTypeRollingAverage.calculateRollingAverage(1);
@@ -762,7 +773,7 @@ int main(void)
 
 				// If above certain length solid if not dashed if neither then no line detected
 				// this value is then inputted to the rolling average
-				if (isinf(rightLineAverageSize))
+				if (rightLines.size() == 0)
 					rightLineType = rightLineTypeRollingAverage.calculateRollingAverage(0);
 				else if (rightLineAverageSize < SOLID_LINE_LENGTH_THRESHOLD)
 					rightLineType = rightLineTypeRollingAverage.calculateRollingAverage(1);
@@ -924,21 +935,32 @@ int main(void)
 						else
 							minY = rightMinY;
 
-						// Make blank frame a blank black frame
-						blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
+						// To prevent hour glass error, detect y value that lines intersect and if within overlay
+						// region then skip printing overlay to screen as is error. This done by the following equation:
+						//
+						// y = (m2*c1 - m1*c2) / (m2-m1)
+						//
+						// where m1 and c1 are left lane edge and m2 and c2 are right lane edge
+						int intersectionY = (mRightLaneEdge*cLeftLaneEdge - mLeftLaneEdge*cRightLaneEdge) / (mRightLaneEdge - mLeftLaneEdge);
 
-						// Add the four points of the quadrangle
-						lanePoints.push_back(cv::Point((minY - cLeftLaneEdge) / mLeftLaneEdge, minY));
-						lanePoints.push_back(cv::Point((minY - cRightLaneEdge) / mRightLaneEdge, minY));
-						lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cRightLaneEdge) / mRightLaneEdge, ROI_BOTTOM_HEIGHT));
-						lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cLeftLaneEdge) / mLeftLaneEdge, ROI_BOTTOM_HEIGHT));
+						if (intersectionY < minY)
+						{
+							// Make blank frame a blank black frame
+							blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
 
-						cv::fillConvexPoly(blankFrame, lanePoints, cv::Scalar(0, 64, 0), cv::LINE_AA, 0);
+							// Add the four points of the quadrangle
+							lanePoints.push_back(cv::Point((minY - cLeftLaneEdge) / mLeftLaneEdge, minY));
+							lanePoints.push_back(cv::Point((minY - cRightLaneEdge) / mRightLaneEdge, minY));
+							lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cRightLaneEdge) / mRightLaneEdge, ROI_BOTTOM_HEIGHT));
+							lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cLeftLaneEdge) / mLeftLaneEdge, ROI_BOTTOM_HEIGHT));
 
-						// Can simply add the two images as the background in blankFrame
-						// is black (0,0,0) and so will not affect the frame image
-						// while still being able to see tarmac
-						cv::add(frame, blankFrame, frame);
+							cv::fillConvexPoly(blankFrame, lanePoints, cv::Scalar(0, 64, 0), cv::LINE_AA, 0);
+
+							// Can simply add the two images as the background in blankFrame
+							// is black (0,0,0) and so will not affect the frame image
+							// while still being able to see tarmac
+							cv::add(frame, blankFrame, frame);
+						}
 					}
 
 					// Write the turning needed to the screen
@@ -1111,25 +1133,24 @@ int main(void)
 				textSize = cv::getTextSize(FPSText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
 				baseline += FONT_THICKNESS;
 				textOrg = cv::Point(5, baseline + textSize.height);
-				cv::putText(ROIFrame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+				cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+
+				// write the frame to video file
+				if (recordOuput)
+					ouputVideo << frame;
 
 				// Display the resulting frame
+				//cv::resize(frame, frame, cv::Size())
 				cv::imshow("frame", frame);
 
 				// Required to display the frame
-				cv::waitKey(1);
-
-				//temp.push_back(
-					std::cout << '\n' << std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
-
-				// Write the frame to a video file
-				if (recordOuput && iterations == 0)
-					frameVideo << frame;
+				if (cv::waitKey(1) == 'q')
+					break;
 			}
 
-			// When everything done, release the video capture objects
+			// When everything done, release the video capture object
 			video.release();
-			frameVideo.release();
+			ouputVideo.release();
 
 			// Closes all the frames
 			cv::destroyAllWindows();

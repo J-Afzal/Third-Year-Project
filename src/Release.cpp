@@ -25,7 +25,7 @@ int main(void)
 	}
 
 	// To record output of code
-	bool recordOuput = true;
+	bool recordOuput = false;
 	cv::VideoWriter ouputVideo;
 	if (recordOuput)
 	{
@@ -123,7 +123,7 @@ int main(void)
 	// YOLO confidence threshold, non-maxima suppression threshold and number of
 	// objects that can be detected
 	constexpr int BLOB_SIZE = 320;
-	constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.5;
+	constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.4;
 	constexpr double YOLO_NMS_THRESHOLD = 0.4;
 	constexpr int BOUNDING_BOX_BUFFER = 5;
 
@@ -235,7 +235,7 @@ int main(void)
 	// Misc
 	int i, j;
 
-	
+
 
 	while (1)
 	{
@@ -704,21 +704,32 @@ int main(void)
 				else
 					minY = rightMinY;
 
-				// Make blank frame a blank black frame
-				blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
+				// To prevent hour glass error, detect y value that lines intersect and if within overlay
+				// region then skip printing overlay to screen as is error. This done by the following equation:
+				//
+				// y = (m2*c1 - m1*c2) / (m2-m1)
+				//
+				// where m1 and c1 are left lane edge and m2 and c2 are right lane edge
+				int intersectionY = (mRightLaneEdge*cLeftLaneEdge - mLeftLaneEdge*cRightLaneEdge) / (mRightLaneEdge - mLeftLaneEdge);
 
-				// Add the four points of the quadrangle
-				lanePoints.push_back(cv::Point((minY - cLeftLaneEdge) / mLeftLaneEdge, minY));
-				lanePoints.push_back(cv::Point((minY - cRightLaneEdge) / mRightLaneEdge, minY));
-				lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cRightLaneEdge) / mRightLaneEdge, ROI_BOTTOM_HEIGHT));
-				lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cLeftLaneEdge) / mLeftLaneEdge, ROI_BOTTOM_HEIGHT));
+				if (intersectionY < minY)
+				{
+					// Make blank frame a blank black frame
+					blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
 
-				cv::fillConvexPoly(blankFrame, lanePoints, cv::Scalar(0, 64, 0), cv::LINE_AA, 0);
+					// Add the four points of the quadrangle
+					lanePoints.push_back(cv::Point((minY - cLeftLaneEdge) / mLeftLaneEdge, minY));
+					lanePoints.push_back(cv::Point((minY - cRightLaneEdge) / mRightLaneEdge, minY));
+					lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cRightLaneEdge) / mRightLaneEdge, ROI_BOTTOM_HEIGHT));
+					lanePoints.push_back(cv::Point((ROI_BOTTOM_HEIGHT - cLeftLaneEdge) / mLeftLaneEdge, ROI_BOTTOM_HEIGHT));
 
-				// Can simply add the two images as the background in blankFrame
-				// is black (0,0,0) and so will not affect the frame image
-				// while still being able to see tarmac
-				cv::add(frame, blankFrame, frame);
+					cv::fillConvexPoly(blankFrame, lanePoints, cv::Scalar(0, 64, 0), cv::LINE_AA, 0);
+
+					// Can simply add the two images as the background in blankFrame
+					// is black (0,0,0) and so will not affect the frame image
+					// while still being able to see tarmac
+					cv::add(frame, blankFrame, frame);
+				}
 			}
 
 			// Write the turning needed to the screen
