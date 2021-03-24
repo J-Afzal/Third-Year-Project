@@ -28,14 +28,13 @@ int main(void)
 	cv::VideoWriter ouputVideo;
 
 	// To edit the ROI for calibration
-	bool editROIUsingImage = true;
+	bool editROIUsingImage = false;
 
 	// Read in the coco names
 	// The std::map links model ID with a string and a string with a colour
 	std::map<int, std::string> modelIntsAndNames;
 	std::map<std::string, cv::Scalar> modelNamesAndColourList;
 	std::ifstream modelNamesFile("../yolo/coco.names");
-	srand(255);
 	if (modelNamesFile.is_open())
 	{
 		std::string line;

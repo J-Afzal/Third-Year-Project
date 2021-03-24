@@ -32,7 +32,6 @@ int main(void)
 	std::map<int, std::string> modelIntsAndNames;
 	std::map<std::string, cv::Scalar> modelNamesAndColourList;
 	std::ifstream modelNamesFile("../yolo/coco.names");
-	srand(255);
 	if (modelNamesFile.is_open())
 	{
 		std::string line;
