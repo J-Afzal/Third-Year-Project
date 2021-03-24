@@ -884,14 +884,7 @@ int main(void)
 		// then put the text itself
 		cv::putText(frame, rightInfoTitleText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 
-		// Display the current FPS
-		cv::rectangle(frame, FPSRect, cv::Scalar(0), cv::FILLED);
-		FPSText = std::to_string((int)(1000 / (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count())) + " FPS";
-		baseline = 0;
-		textSize = cv::getTextSize(FPSText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
-		baseline += FONT_THICKNESS;
-		textOrg = cv::Point(5, baseline + textSize.height);
-		cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+
 
 		// Write the current recording status to frame
 		cv::rectangle(frame, recordOutputRect, cv::Scalar(0), cv::FILLED);
@@ -918,6 +911,19 @@ int main(void)
 			textOrg = cv::Point((recordOutputRect.x + recordOutputRect.width / 2.) - textSize.width / 2., recordOutputRect.y + baseline + textSize.height+5);
 			cv::putText(frame, recordingOuputText, textOrg, FONT_FACE, FONT_SCALE-0.2, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 		}
+
+
+
+		// Display the current FPS
+		cv::rectangle(frame, FPSRect, cv::Scalar(0), cv::FILLED);
+		FPSText = std::to_string((int)(1000 / (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count())) + " FPS";
+		baseline = 0;
+		textSize = cv::getTextSize(FPSText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
+		baseline += FONT_THICKNESS;
+		textOrg = cv::Point(5, baseline + textSize.height);
+		cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+
+
 
 		// Display the resulting frame and in 720p if on Jetson Nano
 		#ifdef __linux__
@@ -950,13 +956,13 @@ int main(void)
 				}
 			}
 			else // recordOuput = true
-			{
 				recordOuput = false;
-			}
 		}
 		// quit program
 		else if (key == 'q')
 			break;
+
+		std::cout << "\n\t" << 1000 / (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
 	}
 
 	// When everything done, release the video capture object
