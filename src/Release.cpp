@@ -2,13 +2,12 @@
 
 #include <iostream>
 #include <fstream>
-#include <math.h>
+#include <chrono>
+#include <iomanip>
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/dnn.hpp"
 #include "rollingAverage.h"
-
-
 
 int main(void)
 {
@@ -27,19 +26,6 @@ int main(void)
 	// To record output of code
 	bool recordOuput = false;
 	cv::VideoWriter ouputVideo;
-	if (recordOuput)
-	{
-		ouputVideo.open("../performance/IRL Test/Bonnet Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-		//ouputVideo.open("../IRL Test/Bonnet SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-		//ouputVideo.open("../IRL Test/Roof Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-		//ouputVideo.open("../IRL Test/Roof SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-
-		if (!ouputVideo.isOpened())
-		{
-			std::cout << "\nError opening video writer object\n";
-			return -2;
-		}
-	}
 
 	// Read in the coco names
 	// The std::map links model ID with a string and a string with a colour
@@ -225,16 +211,16 @@ int main(void)
 	std::vector<cv::Point2f> srcTrafficLight, dstTrafficLight;
 
 	// Writing text to screen
-	std::string titleText = "", rightInfoTitleText = "", giveWayWarningText = "", FPSText = "";
+	std::string titleText = "", rightInfoTitleText = "", giveWayWarningText = "", FPSText = "", recordingOuputText;
 	int baseline = 0;
 	cv::Size textSize;
 	cv::Point textOrg;
 	cv::Rect rightInfoRect(1495, 25, 400, 360);
+	cv::Rect recordOutputRect(1495, 410, 400, 50);
 	cv::Rect FPSRect(0, 0, 145, 45);
 
 	// Misc
 	int i, j;
-
 
 
 	while (1)
@@ -242,11 +228,14 @@ int main(void)
 		// Start the stop watch to measure the FPS
 		auto start = std::chrono::high_resolution_clock::now();
 
+
+
 		// Capture frame
 		video >> frame;
 		if (frame.empty())
 			break;
 		unEditedFrame = frame.clone();
+
 
 
 		// Clear variables that are not over-written but instead added to
@@ -904,16 +893,69 @@ int main(void)
 		textOrg = cv::Point(5, baseline + textSize.height);
 		cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 
-		// write the frame to video file
-		if (recordOuput)
-			ouputVideo << frame;
+		// Write the current recording status to frame
+		cv::rectangle(frame, recordOutputRect, cv::Scalar(0), cv::FILLED);
 
-		// Display the resulting frame
-		//cv::resize(frame, frame, cv::Size())
+		if (recordOuput)
+		{
+			recordingOuputText = "Recording Output";
+			baseline = 0;
+			textSize = cv::getTextSize(recordingOuputText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
+			baseline += FONT_THICKNESS;
+			textOrg = cv::Point((recordOutputRect.x + recordOutputRect.width / 2.) - textSize.width / 2., recordOutputRect.y + baseline + textSize.height);
+			cv::putText(frame, recordingOuputText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+
+			// write the frame to video file
+			ouputVideo << frame;
+		}
+
+		else
+		{
+			recordingOuputText = "Press 'r' to start recording";
+			baseline = 0;
+			textSize = cv::getTextSize(recordingOuputText, FONT_FACE, FONT_SCALE-0.2, FONT_THICKNESS, &baseline);
+			baseline += FONT_THICKNESS;
+			textOrg = cv::Point((recordOutputRect.x + recordOutputRect.width / 2.) - textSize.width / 2., recordOutputRect.y + baseline + textSize.height+5);
+			cv::putText(frame, recordingOuputText, textOrg, FONT_FACE, FONT_SCALE-0.2, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+		}
+
+		// Display the resulting frame and in 720p if on Jetson Nano
+		#ifdef __linux__
+		cv::resize(frame, frame, cv::Size(1280, 720));
+		#endif
 		cv::imshow("frame", frame);
 
 		// Required to display the frame
-		if (cv::waitKey(1) == 'q')
+		char key = (char)cv::waitKey(1);
+		// toggle recording
+		if (key == 'r')
+		{
+			if (recordOuput == false)
+			{
+				recordOuput = true;
+
+				// Get current time for video title
+				time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+				std::stringstream ss;
+				ss << std::put_time(localtime(&now), "%Y-%m-%d %H-%M-%S");
+				std::string currentTime = ss.str();
+
+				// If record toggle is spammed then files can be overwritten but this is not
+				// a problem as the files will be very small and contain no useful information
+				ouputVideo.open("../vids/" + currentTime + " Video.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+				if (!ouputVideo.isOpened())
+				{
+					std::cout << "\nError opening video writer object\n";
+					recordOuput = false;
+				}
+			}
+			else // recordOuput = true
+			{
+				recordOuput = false;
+			}
+		}
+		// quit program
+		else if (key == 'q')
 			break;
 	}
 

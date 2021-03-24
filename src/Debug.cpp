@@ -2,13 +2,12 @@
 
 #include <iostream>
 #include <fstream>
-#include <math.h>
+#include <chrono>
+#include <iomanip>
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/dnn.hpp"
 #include "rollingAverage.h"
-
-
 
 int main(void)
 {
@@ -27,19 +26,9 @@ int main(void)
 	// To record output of code
 	bool recordOuput = false;
 	cv::VideoWriter ouputVideo;
-	if (recordOuput)
-	{
-		ouputVideo.open("../performance/IRL Test/Bonnet Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-		//ouputVideo.open("../IRL Test/Bonnet SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-		//ouputVideo.open("../IRL Test/Roof Linear FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
-		//ouputVideo.open("../IRL Test/Roof SuperView FOV.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
 
-		if (!ouputVideo.isOpened())
-		{
-			std::cout << "\nError opening video writer object\n";
-			return -2;
-		}
-	}
+	// To edit the ROI for calibration
+	bool editROIUsingImage = true;
 
 	// Read in the coco names
 	// The std::map links model ID with a string and a string with a colour
@@ -89,13 +78,13 @@ int main(void)
 	int ROI_BOTTOM_WIDTH = 900;
 
 	// Canny edge detection variables
-	int CANNY_LOWER_THRESHOLD = 64;
-	int CANNY_UPPER_THRESHOLD = 128;
+	constexpr int CANNY_LOWER_THRESHOLD = 64;
+	constexpr int CANNY_UPPER_THRESHOLD = 128;
 
 	// Canny edge detection variables
-	int HOUGHP_THRESHOLD = 32;
-	int HOUGHP_MIN_LINE_LENGTH = 16;
-	int HOUGHP_MAX_LINE_GAP = 8;
+	constexpr int HOUGHP_THRESHOLD = 32;
+	constexpr int HOUGHP_MIN_LINE_LENGTH = 16;
+	constexpr int HOUGHP_MAX_LINE_GAP = 8;
 
 	// Lines lower than this will be horizontal
 	constexpr double HORIZONTAL_GRADIENT_THRESHOLD = 0.15;
@@ -199,11 +188,12 @@ int main(void)
 	std::vector<cv::Point2f> srcTrafficLight, dstTrafficLight;
 
 	// Writing text to screen
-	std::string titleText = "", rightInfoTitleText = "", giveWayWarningText = "", FPSText = "";
+	std::string titleText = "", rightInfoTitleText = "", giveWayWarningText = "", FPSText = "", recordingOuputText;
 	int baseline = 0;
 	cv::Size textSize;
 	cv::Point textOrg;
 	cv::Rect rightInfoRect(1495, 25, 400, 360);
+	cv::Rect recordOutputRect(1495, 410, 400, 50);
 	cv::Rect FPSRect(0, 0, 145, 45);
 
 	// Misc
@@ -212,25 +202,21 @@ int main(void)
 
 
 	// Debug Windows and trackbars
-	cv::namedWindow("ROIFrame", cv::WINDOW_GUI_NORMAL);
-	cv::namedWindow("cannyFrame", cv::WINDOW_GUI_EXPANDED);
-	cv::namedWindow("houghFrame", cv::WINDOW_GUI_EXPANDED);
-	cv::namedWindow("frame", cv::WINDOW_GUI_EXPANDED);
+	if (editROIUsingImage)
+	{
+		cv::namedWindow("ROIFrame", cv::WINDOW_NORMAL);
+		cv::createTrackbar("ROI_TOP_HEIGHT", "ROIFrame", &ROI_TOP_HEIGHT, VIDEO_HEIGHT);
+		cv::createTrackbar("ROI_BOTTOM_HEIGHT", "ROIFrame", &ROI_BOTTOM_HEIGHT, VIDEO_HEIGHT);
+		cv::createTrackbar("ROI_TOP_WIDTH", "ROIFrame", &ROI_TOP_WIDTH, VIDEO_WIDTH);
+		cv::createTrackbar("ROI_BOTTOM_WIDTH", "ROIFrame", &ROI_BOTTOM_WIDTH, VIDEO_WIDTH);
 
-	cv::createTrackbar("ROI_TOP_HEIGHT", "ROIFrame", &ROI_TOP_HEIGHT, VIDEO_HEIGHT);
-	cv::createTrackbar("ROI_BOTTOM_HEIGHT", "ROIFrame", &ROI_BOTTOM_HEIGHT, VIDEO_HEIGHT);
-	cv::createTrackbar("ROI_TOP_WIDTH", "ROIFrame", &ROI_TOP_WIDTH, VIDEO_WIDTH);
-	cv::createTrackbar("ROI_BOTTOM_WIDTH", "ROIFrame", &ROI_BOTTOM_WIDTH, VIDEO_WIDTH);
-
-	cv::createTrackbar("CANNY_LOWER_THRESHOLD", "cannyFrame", &CANNY_LOWER_THRESHOLD, 255);
-	cv::createTrackbar("CANNY_UPPER_THRESHOLD", "cannyFrame", &CANNY_UPPER_THRESHOLD, 255);
-
-	cv::createTrackbar("HOUGHP_THRESHOLD", "houghFrame", &HOUGHP_THRESHOLD, 255);
-	cv::createTrackbar("HOUGHP_MIN_LINE_LENGTH", "houghFrame", &HOUGHP_MIN_LINE_LENGTH, 255);
-	cv::createTrackbar("HOUGHP_MAX_LINE_GAP", "houghFrame", &HOUGHP_MAX_LINE_GAP, 255);
-
-
-
+		unEditedFrame = cv::imread("../vids/0.png");
+		if (unEditedFrame.empty())
+		{
+			std::cout << "\nError opening ROI image\n";
+			return -4;
+		}
+	}
 
 
 
@@ -240,12 +226,19 @@ int main(void)
 		auto start = std::chrono::high_resolution_clock::now();
 
 
+		if (!editROIUsingImage)
+		{
+			// Capture frame
+			video >> frame;
+			if (frame.empty())
+				break;
+			unEditedFrame = frame.clone();
+		}
 
-		// Capture frame
-		video >> frame;
-		if (frame.empty())
-			break;
-		unEditedFrame = frame.clone();
+		else
+		{
+			frame = unEditedFrame.clone();
+		}
 
 
 		// Clear variables that are not over-written but instead added to
@@ -291,6 +284,8 @@ int main(void)
 		// right threshold
 		mRightThresholdEdge = ((double)ROI_TOP_HEIGHT - (double)ROI_BOTTOM_HEIGHT) / (topMidPoint - bottomTwoThird);
 		cRightThresholdEdge = ROI_TOP_HEIGHT - mRightThresholdEdge * topMidPoint;
+
+
 
 		// Populate blankFrame with zeros (all black) and
 		// then create a white mask that is the same size as ROI
@@ -386,7 +381,7 @@ int main(void)
 				dstTrafficLight.push_back(cv::Point2f(0, 200));
 				dstTrafficLight.push_back(cv::Point2f(100, 200));
 
-				// To warp perspective to only contain traffic light
+				// To warp perspective to only contain traffic light but only on the un-edited frame so no bounding boxes shown
 				cv::warpPerspective(unEditedFrame, warpedimage, cv::getPerspectiveTransform(srcTrafficLight, dstTrafficLight, 0), cv::Size(100, 200));
 
 				// count the number of green pixels
@@ -573,9 +568,16 @@ int main(void)
 
 
 
+		// Average lengths of all lines
+		std::cout << "\n\tLeft = " << leftLineAverageSize;
+		std::cout << "\tMiddle = " << middleLineAverageSize;
+		std::cout << "\tRight = " << rightLineAverageSize;
+
+
+
 		// If above certain length solid if not dashed if neither then no line detected
 		// this value is then inputted to the rolling average
-		if (isinf(leftLineAverageSize))
+		if (leftLines.size() == 0)
 			leftLineType = leftLineTypeRollingAverage.calculateRollingAverage(0);
 		else if (leftLineAverageSize < SOLID_LINE_LENGTH_THRESHOLD)
 			leftLineType = leftLineTypeRollingAverage.calculateRollingAverage(1);
@@ -584,7 +586,7 @@ int main(void)
 
 		// If above certain length solid if not dashed if neither then no line detected
 		// this value is then inputted to the rolling average
-		if (isinf(middleLineAverageSize))
+		if (middleLines.size() == 0)
 			middleLineType = middleLineTypeRollingAverage.calculateRollingAverage(0);
 		else if (middleLineAverageSize < SOLID_LINE_LENGTH_THRESHOLD)
 			middleLineType = middleLineTypeRollingAverage.calculateRollingAverage(1);
@@ -593,7 +595,7 @@ int main(void)
 
 		// If above certain length solid if not dashed if neither then no line detected
 		// this value is then inputted to the rolling average
-		if (isinf(rightLineAverageSize))
+		if (rightLines.size() == 0)
 			rightLineType = rightLineTypeRollingAverage.calculateRollingAverage(0);
 		else if (rightLineAverageSize < SOLID_LINE_LENGTH_THRESHOLD)
 			rightLineType = rightLineTypeRollingAverage.calculateRollingAverage(1);
@@ -955,9 +957,41 @@ int main(void)
 		textOrg = cv::Point(5, baseline + textSize.height);
 		cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 
+		// Write the current recording status to frame
+		cv::rectangle(frame, recordOutputRect, cv::Scalar(0), cv::FILLED);
+
+		if (recordOuput)
+		{
+			recordingOuputText = "Recording Output";
+			baseline = 0;
+			textSize = cv::getTextSize(recordingOuputText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
+			baseline += FONT_THICKNESS;
+			textOrg = cv::Point((recordOutputRect.x + recordOutputRect.width / 2.) - textSize.width / 2., recordOutputRect.y + baseline + textSize.height);
+			cv::putText(frame, recordingOuputText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+
+			// write the frame to video file
+			ouputVideo << frame;
+		}
+
+		else
+		{
+			recordingOuputText = "Press 'r' to start recording";
+			baseline = 0;
+			textSize = cv::getTextSize(recordingOuputText, FONT_FACE, FONT_SCALE-0.2, FONT_THICKNESS, &baseline);
+			baseline += FONT_THICKNESS;
+			textOrg = cv::Point((recordOutputRect.x + recordOutputRect.width / 2.) - textSize.width / 2., recordOutputRect.y + baseline + textSize.height+5);
+			cv::putText(frame, recordingOuputText, textOrg, FONT_FACE, FONT_SCALE-0.2, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+		}
 
 
-		// Display the resulting frame
+
+		// Display the resulting frame and in 720p if on Jetson Nano
+		#ifdef __linux__
+		cv::resize(ROIFrame, ROIFrame, cv::Size(1280, 720));
+		//cv::resize(cannyFrame, cannyFrame, cv::Size(1280, 720));
+		//cv::resize(houghFrame, houghFrame, cv::Size(1280, 720));
+		cv::resize(frame, frame, cv::Size(1280, 720));
+		#endif
 		cv::imshow("ROIFrame", ROIFrame);
 		//cv::imshow("cannyFrame", cannyFrame);
 		//cv::imshow("houghFrame", houghFrame);
@@ -965,17 +999,55 @@ int main(void)
 
 
 
-		// Allow for pausing of videos
-		if ((char)cv::waitKey(1) == 'k')
-			while (1)
+		// Required to display the frame
+		char key = (char)cv::waitKey(1);
+		// toggle recording
+		if (key == 'r')
+		{
+			if (recordOuput == false)
 			{
-				if ((char)cv::waitKey(1) == 'k')
-					break;
+				recordOuput = true;
+
+				// Get current time for video title
+				time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+				std::stringstream ss;
+				ss << std::put_time(localtime(&now), "%Y-%m-%d %H-%M-%S");
+				std::string currentTime = ss.str();
+
+				// If record toggle is spammed then files can be overwritten but this is not
+				// a problem as the files will be very small and contain no useful information
+				ouputVideo.open("../vids/" + currentTime + " Video.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+				if (!ouputVideo.isOpened())
+				{
+					std::cout << "\nError opening video writer object\n";
+					recordOuput = false;
+				}
 			}
+			else // recordOuput = true
+			{
+				recordOuput = false;
+			}
+		}
+		// screenshot
+		else if (key == 's')
+		{
+				// Get current time for video title
+				time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+				std::stringstream ss;
+				ss << std::put_time(localtime(&now), "%Y-%m-%d %H-%M-%S");
+				std::string currentTime = ss.str();
+
+				cv::imwrite("../vids/" + currentTime + " Screenshot of Display.png", frame);
+				cv::imwrite("../vids/" + currentTime + " Screenshot of Unedited Display.png", unEditedFrame);
+		}
+		// quit program
+		else if (key == 'q')
+			break;
 	}
 
 	// When everything done, release the video capture object
 	video.release();
+	ouputVideo.release();
 
 	// Closes all the frames
 	cv::destroyAllWindows();
