@@ -74,10 +74,10 @@ int main(void)
 	constexpr int ROI_BOTTOM_WIDTH = 900;
 
 	// Canny edge detection variables
-	constexpr int CANNY_LOWER_THRESHOLD = 64;
-	constexpr int CANNY_UPPER_THRESHOLD = 128;
+	constexpr int CANNY_LOWER_THRESHOLD = 128;
+	constexpr int CANNY_UPPER_THRESHOLD = 255;
 
-	// Canny edge detection variables
+	// Hough detection variables
 	constexpr int HOUGHP_THRESHOLD = 32;
 	constexpr int HOUGHP_MIN_LINE_LENGTH = 16;
 	constexpr int HOUGHP_MAX_LINE_GAP = 8;

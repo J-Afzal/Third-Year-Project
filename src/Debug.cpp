@@ -77,10 +77,10 @@ int main(void)
 	int ROI_BOTTOM_WIDTH = 900;
 
 	// Canny edge detection variables
-	constexpr int CANNY_LOWER_THRESHOLD = 64;
-	constexpr int CANNY_UPPER_THRESHOLD = 128;
+	int CANNY_LOWER_THRESHOLD = 128;
+	int CANNY_UPPER_THRESHOLD = 255;
 
-	// Canny edge detection variables
+	// Hough detection variables
 	constexpr int HOUGHP_THRESHOLD = 32;
 	constexpr int HOUGHP_MIN_LINE_LENGTH = 16;
 	constexpr int HOUGHP_MAX_LINE_GAP = 8;
@@ -208,6 +208,10 @@ int main(void)
 		cv::createTrackbar("ROI_BOTTOM_HEIGHT", "ROIFrame", &ROI_BOTTOM_HEIGHT, VIDEO_HEIGHT);
 		cv::createTrackbar("ROI_TOP_WIDTH", "ROIFrame", &ROI_TOP_WIDTH, VIDEO_WIDTH);
 		cv::createTrackbar("ROI_BOTTOM_WIDTH", "ROIFrame", &ROI_BOTTOM_WIDTH, VIDEO_WIDTH);
+
+		cv::namedWindow("cannyFrame", cv::WINDOW_NORMAL);
+		cv::createTrackbar("CANNY_LOWER_THRESHOLD", "cannyFrame", &CANNY_LOWER_THRESHOLD, 500);
+		cv::createTrackbar("CANNY_UPPER_THRESHOLD", "cannyFrame", &CANNY_UPPER_THRESHOLD, 500);
 
 		unEditedFrame = cv::imread("../vids/0.png");
 		if (unEditedFrame.empty())
@@ -991,13 +995,13 @@ int main(void)
 		// Display the resulting frame and in 720p if on Jetson Nano
 		#ifdef __linux__
 		cv::resize(ROIFrame, ROIFrame, cv::Size(1280, 720));
-		//cv::resize(cannyFrame, cannyFrame, cv::Size(1280, 720));
-		//cv::resize(houghFrame, houghFrame, cv::Size(1280, 720));
+		cv::resize(cannyFrame, cannyFrame, cv::Size(1280, 720));
+		cv::resize(houghFrame, houghFrame, cv::Size(1280, 720));
 		cv::resize(frame, frame, cv::Size(1280, 720));
 		#endif
 		cv::imshow("ROIFrame", ROIFrame);
-		//cv::imshow("cannyFrame", cannyFrame);
-		//cv::imshow("houghFrame", houghFrame);
+		cv::imshow("cannyFrame", cannyFrame);
+		cv::imshow("houghFrame", houghFrame);
 		cv::imshow("frame", frame);
 
 
