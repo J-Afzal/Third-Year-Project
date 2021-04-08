@@ -12,8 +12,8 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	//cv::VideoCapture video("../vids/benchmark.mp4");
-	cv::VideoCapture video(0);
+	cv::VideoCapture video("../vids/benchmark.mp4");
+	//cv::VideoCapture video(0);
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
 	// Check if camera opened successfully
@@ -1044,6 +1044,15 @@ int main(void)
 
 				cv::imwrite("../vids/" + currentTime + " Screenshot of Display.png", frame);
 				cv::imwrite("../vids/" + currentTime + " Screenshot of Unedited Display.png", unEditedFrame);
+		}
+		// pause
+		else if (key == 'k')
+		{
+			while (1)
+			{
+				if (cv::waitKey(1) == 'k')
+					break;
+			}
 		}
 		// quit program
 		else if (key == 'q')
