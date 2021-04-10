@@ -4,16 +4,16 @@ clear variables;
 close all;
 
 % Platforms
-% platform = 'Windows 10 Desktop';
-% platform = 'Linux (Ubuntu 20.04) Desktop';
-% platform = 'Jetson Nano (4GB)';
+% platform = 'Output for Windows 10 Desktop';
+% platform = 'Output for Linux Desktop';
+% platform = 'Output for Jetson Nano';
 
 % File arrays
 files = dir(strcat(platform, '/'));
 
 % Consts
 fileSize = length(files);
-if (strcmp(platform,'Jetson Nano (4GB)'))
+if (strcmp(platform,'Jetson Nano'))
     numberOfFiles = 11;
 else
     numberOfFiles = 21;
@@ -56,7 +56,7 @@ figure1 = figure;
 set(gcf, 'Position',  [100, 100, 850, 700]);
 
 % Set the colormap to green for CUDA and purple for
-if (strcmp(platform, 'Jetson Nano (4GB)'))
+if (strcmp(platform, 'Jetson Nano'))
     newcolors = [0 0.7 0];
     colororder(newcolors);
 else
@@ -97,16 +97,16 @@ for i=2:11
 end
 
 xlabel('Frame Number');
-ylabel('Computation Time (ms)');
+ylabel('Time to compute frame (ms)');
 axis tight;
-if (strcmp(platform, 'Jetson Nano (4GB)'))
+if (strcmp(platform, 'Jetson Nano'))
     ylim([0 1300]);
 else
     ylim([0 300]);
 end
 grid on;
-title(strcat('Frame times for ', {' '}, platform));
-if (strcmp(platform, 'Jetson Nano (4GB)'))
+title(strcat(platform, {' '}, 'Frame Time Plot' ));
+if (strcmp(platform, 'Jetson Nano'))
     legend('No YOLOv4 and YOLOv4 with CUDA', 'location','southoutside');
 else
     legend('No YOLOv4', ' YOLOv4 without CUDA', 'YOLOv4 with CUDA', 'location','southoutside');
@@ -114,14 +114,14 @@ end
 
 % Save to .png
 f = gcf;
-exportgraphics(f, strcat('All Data/', platform, ' Frame Time Plot.png'));
+exportgraphics(f, strcat('Graphs/', platform, ' Frame Time Plot.png'));
 
 %% FPS plots
 figure2 = figure;
 set(gcf, 'Position',  [1050, 100, 850, 700]);
 
 % Set the colormap to green for CUDA and purple for
-if (strcmp(platform, 'Jetson Nano (4GB)'))
+if (strcmp(platform, 'Jetson Nano'))
     newcolors = [0 0.7 0];
     colororder(newcolors);
 else
@@ -134,7 +134,7 @@ end
 x = categorical({'No YOLOv4', 'YOLOv4-tiny 288','YOLOv4-tiny 320','YOLOv4-tiny 416', 'YOLOv4-tiny 512', 'YOLOv4-tiny 608', 'YOLOv4 288','YOLOv4 320','YOLOv4 416', 'YOLOv4 512', 'YOLOv4 608'});
 x = reordercats(x,{'No YOLOv4', 'YOLOv4-tiny 288','YOLOv4-tiny 320','YOLOv4-tiny 416', 'YOLOv4-tiny 512', 'YOLOv4-tiny 608', 'YOLOv4 288','YOLOv4 320','YOLOv4 416', 'YOLOv4 512', 'YOLOv4 608'});
 
-if (strcmp(platform, 'Jetson Nano (4GB)'))
+if (strcmp(platform, 'Jetson Nano'))
 y = [averageFPS(1)];
     for i=7:numberOfFiles
         y = [y;averageFPS(i)];
@@ -158,8 +158,8 @@ end
 % Create the plot
 barChart = bar(x,y);
 xlabel('YOLOv4 Type');
-ylabel('Frames per seconds (FPS)');
-if (strcmp(platform, 'Jetson Nano (4GB)'))
+ylabel('Frames per second (FPS)');
+if (strcmp(platform, 'Jetson Nano'))
     ylim([0 15]);
     set(barChart, {'DisplayName'}, {' with CUDA'}');
 else
@@ -167,11 +167,11 @@ else
     set(barChart, {'DisplayName'}, {' without CUDA', ' with CUDA'}');
 end
 grid on;
-title(strcat('FPS values for', {' '}, platform));
+title(strcat(platform, {' '}, 'FPS Plot'));
 legend();
 
 % Display the value of each bar on top of the each bar
-if (strcmp(platform, 'Jetson Nano (4GB)'))
+if (strcmp(platform, 'Jetson Nano'))
     xtips = barChart(1).XEndPoints;
     ytips = barChart(1).YEndPoints;
     labels = string(barChart(1).YData);
@@ -190,7 +190,7 @@ end
 
 % Save to .png
 f = gcf;
-exportgraphics(f, strcat('All Data/', platform, ' FPS Plot.png'));
+exportgraphics(f, strcat('Graphs/', platform, ' FPS Plot.png'));
 
 clear variables;
 close all;

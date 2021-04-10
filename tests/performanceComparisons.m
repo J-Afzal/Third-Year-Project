@@ -4,9 +4,9 @@ clear variables;
 close all;
 
 % Platforms
-windows = 'Windows 10 Desktop';
-linux = 'Linux (Ubuntu 20.04) Desktop';
-jetson = 'Jetson Nano (4GB)';
+windows = 'Output for Windows 10 Desktop';
+linux = 'Output for Linux Desktop';
+jetson = 'Output for Jetson Nano';
 
 % File arrays
 windowsFiles = dir(strcat(windows, '/'));
@@ -142,16 +142,16 @@ for i=1:numberOfTests
     hold on;
 end
 xlabel('Frame Number');
-ylabel('Computation Time (ms)');
+ylabel('Time to compute frame (ms)');
 axis tight;
 ylim([0 1300]);
 grid on;
-title('Frame times for all platforms');
-legend(' Windows 10 Desktop', ' Linux (Ubuntu 20.04) Desktop', ' Jetson Nano (4GB)', 'location','southoutside');
+title('All Platforms Frame Time Plot');
+legend(' Windows 10 Desktop', ' Linux Desktop', ' Jetson Nano', 'location','southoutside');
 
 % Save to .png
 f = gcf;
-exportgraphics(f, 'All Data/All Platforms Frame Time Plot.png');
+exportgraphics(f, 'Graphs/All Platforms Frame Time Plot.png');
 
 %% FPS Values
 figure2 = figure;
@@ -178,12 +178,12 @@ end
 
 % Create the plot
 barChart = bar(x,y);
-set(barChart, {'DisplayName'}, {' Windows 10 Desktop', ' Linux (Ubuntu 20.04) Desktop', ' Jetson Nano (4GB)'}');
+set(barChart, {'DisplayName'}, {' Windows 10 Desktop', ' Linux Desktop', ' Jetson Nano'}');
 xlabel('YOLOv4 Type');
-ylabel('Frames per seconds (FPS)');
+ylabel('Frames per second (FPS)');
 ylim([0 100]);
 grid on;
-title('FPS values for all platforms');
+title('All Platforms FPS Plot');
 legend();
 
 % Display the value of each bar on top of the each bar
@@ -204,7 +204,7 @@ text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bott
 
 % Save to .png
 f = gcf;
-exportgraphics(f, 'All Data/All Platforms FPS Time Plot.png');
+exportgraphics(f, 'Graphs/All Platforms FPS Plot.png');
 
 % clear variables;
 % close all;

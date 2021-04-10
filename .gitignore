@@ -1,9 +1,9 @@
 # MSVC projects
-Project_Debug/
-Project_Release/
-Project_Tests/
+_Project_Debug/
+_Project_Release/
+_Project_Tests/
 yolo/yolov4.weights
-vids/motorway.mp4
+media/motorway.mp4
 
 # Prerequisites
 *.d

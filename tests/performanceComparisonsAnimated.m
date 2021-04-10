@@ -4,9 +4,9 @@ clear variables;
 close all;
 
 % Platforms
-windows = 'Windows 10 Desktop';
-linux = 'Linux (Ubuntu 20.04) Desktop';
-jetson = 'Jetson Nano (4GB)';
+windows = 'Output for Windows 10 Desktop';
+linux = 'Output for Linux Desktop';
+jetson = 'Output for Jetson Nano';
 
 % File arrays
 windowsFiles = dir(strcat(windows, '/'));
@@ -17,7 +17,7 @@ jetsonFiles = dir(strcat(jetson, '/'));
 numberOfFiles = length(windowsFiles);
 numberOfDataPoints = 1155; % Ignore first frame due to being very high
 numberOfTests = 11;
-videoLocation = 'All Data\matlab vids\';
+videoLocation = 'Animated Graphs\';
 videoFPS = 30;
 x = 1:1:numberOfDataPoints;
 
@@ -56,11 +56,11 @@ for i=1:numberOfTests
 
     % Graph props
     xlabel('Frame Number');
-    ylabel('Computation Time (ms)');
+    ylabel('Time to compute frame (ms)');
     xlim([0 1155]);
     grid on;
     title(strcat('Frame times for ', {' '}, testFiles(i).name), 'Interpreter', 'none');
-    legend(' Windows 10 Desktop', ' Linux (Ubuntu 20.04) Desktop', ' Jetson Nano (4GB)', 'location','southoutside');
+    legend(' Windows 10 Desktop', ' Linux Desktop', ' Jetson Nano', 'location','southoutside');
 
     outputVideo = VideoWriter(strcat(testFiles(i).folder, '\..\', videoLocation, testFiles(i).name), 'MPEG-4');
     outputVideo.FrameRate = videoFPS;    
