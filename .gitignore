@@ -3,8 +3,7 @@ Project_Debug/
 Project_Release/
 Project_Tests/
 yolo/yolov4.weights
-vids/vertical.mp4
-vids/horizontal.mp4
+vids/motorway.mp4
 
 # Prerequisites
 *.d

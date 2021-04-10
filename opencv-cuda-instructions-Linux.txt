@@ -18,3 +18,10 @@ export LD_LIBRARY_PATH=/usr/local/cuda-11.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRAR
 
 # cmake gui options
 -DOPENCV_DNN_CUDA:BOOL="1" -DCUDNN_INCLUDE_DIR:PATH="/home/main/Downloads/cuda/include" -DCMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO:STRING="" -DCUDA_GENERATION:STRING="Maxwell" -DCMAKE_CONFIGURATION_TYPES:STRING="Release" -DWITH_OPENGL:BOOL="1" -DCUDA_ARCH_BIN:STRING="5.2" -DCUDA_TOOLKIT_INCLUDE:PATH="/usr/local/cuda/include" -DOPENCV_GENERATE_PKGCONFIG:BOOL="1" -DCUDA_SDK_ROOT_DIR:PATH="/usr/local/cuda-11.2" -DCUDA_FAST_MATH:BOOL="1" -DOPENCV_EXTRA_MODULES_PATH:PATH="/home/main/Downloads/opencv/opencv_contrib-4.5.1/modules" -DCUDNN_LIBRARY:FILEPATH="/home/main/Downloads/cuda/lib64/libcudnn.so.8.1.1" -DCUDA_HOST_COMPILATION_CPP:BOOL="1" -DENABLE_FAST_MATH:BOOL="1" -DCUDA_GENERATED_OUTPUT_DIR:PATH="" -DOPENCV_ENABLE_NONFREE:BOOL="1" -DCUDA_NVCC_FLAGS_DEBUG:STRING="" -DCUDA_ARCH_PTX:STRING="" -DWITH_CUDA:BOOL="1" -DWITH_TBB:BOOL="1"
+
+
+
+
+
+# Execute code
+g++ performance.cpp ../src/rollingAverage.cpp -Wall -O3 -o YOLO.exe `pkg-config opencv --cflags --libs` && ./YOLO.exe
