@@ -12,7 +12,7 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	cv::VideoCapture video("../vids/benchmark.mp4");
+	cv::VideoCapture video("../media/benchmark.mp4");
 	//cv::VideoCapture video(0);
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
@@ -62,7 +62,7 @@ int main(void)
 	}
 
 	// Setup the YOLO CUDA OpenCV DNN
-	cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4-tiny.cfg", "../yolo/yolov4-tiny.weights");
+	cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4.cfg", "../yolo/yolov4.weights");
 	net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
 	net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
 	std::vector<std::string> unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
@@ -110,7 +110,7 @@ int main(void)
 
 	// YOLO confidence threshold, non-maxima suppression threshold and number of
 	// objects that can be detected
-	constexpr int BLOB_SIZE = 320;
+	constexpr int BLOB_SIZE = 608;
 	constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.4;
 	constexpr double YOLO_NMS_THRESHOLD = 0.4;
 	constexpr int BOUNDING_BOX_BUFFER = 5;
@@ -193,7 +193,12 @@ int main(void)
 	cv::Point textOrg;
 	cv::Rect rightInfoRect(1495, 25, 400, 360);
 	cv::Rect recordOutputRect(1495, 410, 400, 50);
-	cv::Rect FPSRect(0, 0, 145, 45);
+	cv::Rect FPSRect(25, 25, 350, 100);
+
+	// FPS calculation variables
+	long frameNumber = 0;
+	double previousFPS = 0;
+	double previousAverageFPS = 0;
 
 	// Misc
 	int i, j;
@@ -213,7 +218,7 @@ int main(void)
 		cv::createTrackbar("CANNY_LOWER_THRESHOLD", "cannyFrame", &CANNY_LOWER_THRESHOLD, 500);
 		cv::createTrackbar("CANNY_UPPER_THRESHOLD", "cannyFrame", &CANNY_UPPER_THRESHOLD, 500);
 
-		unEditedFrame = cv::imread("../vids/0.png");
+		unEditedFrame = cv::imread("../media/0.png");
 		if (unEditedFrame.empty())
 		{
 			std::cout << "\nError opening ROI image\n";
@@ -227,6 +232,14 @@ int main(void)
 	{
 		// Start the stop watch to measure the FPS
 		auto start = std::chrono::high_resolution_clock::now();
+
+
+
+		// Calculate the average FPS for the previous frames
+		frameNumber++;
+		if (frameNumber != 1)
+			previousAverageFPS = (previousAverageFPS*(frameNumber-2) + previousFPS)/(frameNumber-1);
+
 
 
 		if (!editROIUsingImage)
@@ -942,6 +955,8 @@ int main(void)
 		// then put the text itself
 		cv::putText(frame, titleText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 
+
+
 		// Write right info box title to screen
 		baseline = 0;
 		textSize = cv::getTextSize(rightInfoTitleText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
@@ -950,6 +965,29 @@ int main(void)
 		textOrg = cv::Point((rightInfoRect.x + rightInfoRect.width / 2.) - textSize.width / 2., rightInfoRect.y + baseline + textSize.height);
 		// then put the text itself
 		cv::putText(frame, rightInfoTitleText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+
+
+
+		// Display the previous average FPS and previous frame FPS
+		cv::rectangle(frame, FPSRect, cv::Scalar(0), cv::FILLED);
+
+		std::stringstream ss1;
+		ss1 << std::fixed << std::setprecision(2) << previousAverageFPS;
+		FPSText = "Average FPS: " + ss1.str();
+		baseline = 0;
+		textSize = cv::getTextSize(FPSText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
+		baseline += FONT_THICKNESS;
+		textOrg = cv::Point(30, 25 + baseline + textSize.height);
+		cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
+
+		std::stringstream ss2;
+		ss2 << std::fixed << std::setprecision(2) << previousFPS;
+		FPSText = "Current FPS: " + ss2.str();
+		baseline = 0;
+		textSize = cv::getTextSize(FPSText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
+		baseline += FONT_THICKNESS;
+		textOrg = cv::Point(30, 75 + baseline + textSize.height);
+		cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 
 
 
@@ -978,17 +1016,6 @@ int main(void)
 			textOrg = cv::Point((recordOutputRect.x + recordOutputRect.width / 2.) - textSize.width / 2., recordOutputRect.y + baseline + textSize.height+5);
 			cv::putText(frame, recordingOuputText, textOrg, FONT_FACE, FONT_SCALE-0.2, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 		}
-
-
-
-		// Display the current FPS
-		cv::rectangle(frame, FPSRect, cv::Scalar(0), cv::FILLED);
-		FPSText = std::to_string((int)(1000 / (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count())) + " FPS";
-		baseline = 0;
-		textSize = cv::getTextSize(FPSText, FONT_FACE, FONT_SCALE, FONT_THICKNESS, &baseline);
-		baseline += FONT_THICKNESS;
-		textOrg = cv::Point(5, baseline + textSize.height);
-		cv::putText(frame, FPSText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 
 
 
@@ -1023,7 +1050,7 @@ int main(void)
 
 				// If record toggle is spammed then files can be overwritten but this is not
 				// a problem as the files will be very small and contain no useful information
-				ouputVideo.open("../vids/" + currentTime + " Video.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+				ouputVideo.open("../media/" + currentTime + " Video.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
 				if (!ouputVideo.isOpened())
 				{
 					std::cout << "\nError opening video writer object\n";
@@ -1042,8 +1069,8 @@ int main(void)
 				ss << std::put_time(localtime(&now), "%Y-%m-%d %H-%M-%S");
 				std::string currentTime = ss.str();
 
-				cv::imwrite("../vids/" + currentTime + " Screenshot of Display.png", frame);
-				cv::imwrite("../vids/" + currentTime + " Screenshot of Unedited Display.png", unEditedFrame);
+				cv::imwrite("../media/" + currentTime + " Screenshot of Display.png", frame);
+				cv::imwrite("../media/" + currentTime + " Screenshot of Unedited Display.png", unEditedFrame);
 		}
 		// pause
 		else if (key == 'k')
@@ -1058,7 +1085,8 @@ int main(void)
 		else if (key == 'q')
 			break;
 
-		std::cout << "\t" << 1000 / (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
+			// Get the FPS
+			previousFPS = 1000 / (double)std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
 	}
 
 	// When everything done, release the video capture object
