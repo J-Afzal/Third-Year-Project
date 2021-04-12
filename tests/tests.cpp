@@ -31,9 +31,9 @@ int main(void)
 	int numberOfTests = 21;
 	int frameCount = 1155;
 
-	//std::string platformDirectory = "../tests/Ouput For Windows 10 Desktop/";
-	//std::string platformDirectory = "../tests/Output For Ubuntu 20.04 Desktop/";
-	//std::string platformDirectory = "../tests/Output For Jetson Nano/";
+	//std::string platformDirectory = "../tests/Output for Windows 10 Desktop/";
+	//std::string platformDirectory = "../tests/Output for Ubuntu 20.04 Desktop/";
+	//std::string platformDirectory = "../tests/Output for Jetson Nano/";
 
 	bool saveResults = true;
 
@@ -283,12 +283,18 @@ int main(void)
 				std::cout << "\nError opening coco.names file stream or file\n";
 				return -3;
 			}
-			
-			// Setup the YOLO CUDA OpenCV DNN
-			cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4.cfg", "../yolo/yolov4.weights");
-			net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
-			net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
-			std::vector<std::string> unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
+
+			cv::dnn::Net net;
+			std::vector<std::string> unconnectedOutLayersNames;
+			if (yolo[testNumber])
+			{
+				// Setup the YOLO CUDA OpenCV DNN
+				net = cv::dnn::readNetFromDarknet(yoloTypeConfig[testNumber], yoloTypeWeights[testNumber]);
+				net.setPreferableBackend(dnnBackend[testNumber]);
+				net.setPreferableTarget(dnnTarget[testNumber]);
+				unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
+			}
+
 
 			// Hard-Coded Parameters
 			// Lane Region of interest (ROI)
@@ -331,7 +337,7 @@ int main(void)
 
 			// YOLO confidence threshold, non-maxima suppression threshold and number of
 			// objects that can be detected
-			constexpr int BLOB_SIZE = 608;
+			int BLOB_SIZE = blobSize[testNumber];
 			constexpr double YOLO_CONFIDENCE_THRESHOLD = 0.4;
 			constexpr double YOLO_NMS_THRESHOLD = 0.4;
 			constexpr int BOUNDING_BOX_BUFFER = 5;
@@ -1178,9 +1184,9 @@ int main(void)
 
 
 				// Display the resulting frame and in 720p if on Jetson Nano
-				#ifdef __linux__
-				cv::resize(frame, frame, cv::Size(1280, 720));
-				#endif
+				//#ifdef __linux__
+				//cv::resize(frame, frame, cv::Size(1280, 720));
+				//#endif
 				cv::imshow("frame", frame);
 
 				// Required to display the frame
