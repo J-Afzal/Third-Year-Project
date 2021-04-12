@@ -12,7 +12,7 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	cv::VideoCapture video("../../../3. Videos/Vertical Lanes/All.mp4");
+	cv::VideoCapture video("../media/benchmark.mp4");
 	//cv::VideoCapture video(0);
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
