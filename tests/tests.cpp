@@ -1184,9 +1184,9 @@ int main(void)
 
 
 				// Display the resulting frame and in 720p if on Jetson Nano
-				//#ifdef __linux__
-				//cv::resize(frame, frame, cv::Size(1280, 720));
-				//#endif
+				#ifdef __linux__
+				cv::resize(frame, frame, cv::Size(1280, 720));
+				#endif
 				cv::imshow("frame", frame);
 
 				// Required to display the frame
