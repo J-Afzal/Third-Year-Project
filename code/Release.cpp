@@ -12,12 +12,12 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	cv::VideoCapture video("../media/benchmark.mp4");
-	//cv::VideoCapture video(0);
-	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
-	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
+	cv::VideoCapture inputVideo("../media/benchmark.mp4");
+	//cv::VideoCapture inputVideo(0);
+	inputVideo.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
+	inputVideo.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
 	// Check if camera opened successfully
-	if (!video.isOpened())
+	if (!inputVideo.isOpened())
 	{
 		std::cout << "\nError opening video capture object\n";
 		return -1;
@@ -25,7 +25,7 @@ int main(void)
 
 	// To record output of code
 	bool recordOuput = false;
-	cv::VideoWriter ouputVideo;
+	cv::VideoWriter ouputFrameVideo;
 
 	// Read in the coco names
 	// The std::map links model ID with a string and a string with a colour
@@ -100,9 +100,9 @@ int main(void)
 	// How many frames to wait for until trying to find a difference in car position
 	// to determine whether the car is moving left or right. NOTE that this is heavily
 	// dependent upon frame rate
-	int VIDEO_WIDTH = video.get(cv::CAP_PROP_FRAME_WIDTH);
-	int VIDEO_HEIGHT = video.get(cv::CAP_PROP_FRAME_HEIGHT);
-	int VIDEO_FPS = video.get(cv::CAP_PROP_FPS);
+	int VIDEO_WIDTH = inputVideo.get(cv::CAP_PROP_FRAME_WIDTH);
+	int VIDEO_HEIGHT = inputVideo.get(cv::CAP_PROP_FRAME_HEIGHT);
+	int VIDEO_FPS = inputVideo.get(cv::CAP_PROP_FPS);
 	int FRAME_COUNT_THRESHOLD = VIDEO_FPS / 3.;
 
 	// YOLO confidence threshold, non-maxima suppression threshold and number of
@@ -243,7 +243,7 @@ int main(void)
 
 
 		// Capture frame
-		video >> frame;
+		inputVideo >> frame;
 		if (frame.empty())
 			break;
 		unEditedFrame = frame.clone();
@@ -936,7 +936,7 @@ int main(void)
 			cv::putText(frame, recordingOuputText, textOrg, FONT_FACE, FONT_SCALE, cv::Scalar::all(255), FONT_THICKNESS, cv::LINE_AA);
 
 			// write the frame to video file
-			ouputVideo << frame;
+			ouputFrameVideo << frame;
 		}
 
 		else
@@ -974,8 +974,8 @@ int main(void)
 
 				// If record toggle is spammed then files can be overwritten but this is not
 				// a problem as the files will be very small and contain no useful information
-				ouputVideo.open("../media/" + currentTime + " Video.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(VIDEO_WIDTH, VIDEO_HEIGHT), true);
-				if (!ouputVideo.isOpened())
+				ouputFrameVideo.open("../media/" + currentTime + " Frame.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(VIDEO_WIDTH, VIDEO_HEIGHT), true);
+				if (!ouputFrameVideo.isOpened())
 				{
 					std::cout << "\nError opening video writer object\n";
 					recordOuput = false;
@@ -993,8 +993,8 @@ int main(void)
 	}
 
 	// When everything done, release the video capture object
-	video.release();
-	ouputVideo.release();
+	inputVideo.release();
+	ouputFrameVideo.release();
 
 	// Closes all the frames
 	cv::destroyAllWindows();
