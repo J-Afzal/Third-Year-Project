@@ -459,8 +459,7 @@ int main(void)
 				if ((houghLines[i][1] < leftY1) && (houghLines[i][3] < leftY2) && gradient < 0)
 				{
 					leftLines.push_back(houghLines[i]);
-					leftLineAverageSize += std::sqrt((houghLines[i][0] - houghLines[i][2]) * (houghLines[i][0] - houghLines[i][2])
-						+ (houghLines[i][1] - houghLines[i][3]) * (houghLines[i][1] - houghLines[i][3]));
+					leftLineAverageSize += std::sqrt((houghLines[i][0] - houghLines[i][2]) * (houghLines[i][0] - houghLines[i][2]) + (houghLines[i][1] - houghLines[i][3]) * (houghLines[i][1] - houghLines[i][3]));
 					continue;
 				}
 
@@ -477,16 +476,14 @@ int main(void)
 				if ((houghLines[i][1] < rightY1) && (houghLines[i][3] < rightY2) && gradient > 0)
 				{
 					rightLines.push_back(houghLines[i]);
-					rightLineAverageSize += std::sqrt((houghLines[i][0] - houghLines[i][2]) * (houghLines[i][0] - houghLines[i][2])
-						+ (houghLines[i][1] - houghLines[i][3]) * (houghLines[i][1] - houghLines[i][3]));
+					rightLineAverageSize += std::sqrt((houghLines[i][0] - houghLines[i][2]) * (houghLines[i][0] - houghLines[i][2])	+ (houghLines[i][1] - houghLines[i][3]) * (houghLines[i][1] - houghLines[i][3]));
 					continue;
 				}
 
 				// else must be in middle
 				middleLines.push_back(houghLines[i]);
 
-				middleLineAverageSize += std::sqrt((houghLines[i][0] - houghLines[i][2]) * (houghLines[i][0] - houghLines[i][2])
-					+ (houghLines[i][1] - houghLines[i][3]) * (houghLines[i][1] - houghLines[i][3]));
+				middleLineAverageSize += std::sqrt((houghLines[i][0] - houghLines[i][2]) * (houghLines[i][0] - houghLines[i][2]) + (houghLines[i][1] - houghLines[i][3]) * (houghLines[i][1] - houghLines[i][3]));
 			}
 		}
 
