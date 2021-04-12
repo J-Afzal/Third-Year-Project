@@ -3,13 +3,17 @@
 clear variables;
 close all;
 
-% Platforms
-% platform = 'Output for Windows 10 Desktop';
-% platform = 'Output for Ubuntu 20.04 Desktop';
-% platform = 'Output for Jetson Nano';
+% platformDirectory = 'Output for Windows 10 Desktop';
+% platform = 'Windows 10 Desktop';
+
+% platformDirectory = 'Output for Ubuntu 20.04 Desktop';
+% platform = 'Ubuntu 20.04 Desktop';
+
+% platformDirectory = 'Output for Jetson Nano';
+% platform = 'Jetson Nano';
 
 % File arrays
-files = dir(strcat(platform, '/'));
+files = dir(strcat(platformDirectory, '/'));
 
 % Consts
 fileSize = length(files);
@@ -53,7 +57,7 @@ end
 
 %% Frame plots
 figure1 = figure;
-set(gcf, 'Position',  [100, 100, 850, 700]);
+set(gcf, 'Position',  [100, 100, 1250, 750]);
 
 % Set the colormap to green for CUDA and purple for
 if (strcmp(platform, 'Jetson Nano'))
@@ -118,8 +122,8 @@ exportgraphics(f, strcat('Graphs/', platform, ' Frame Time Plot.png'));
 
 %% FPS plots
 figure2 = figure;
-set(gcf, 'Position',  [1050, 100, 850, 700]);
-
+set(gcf, 'Position',  [100, 100, 1250, 750]);
+    
 % Set the colormap to green for CUDA and purple for
 if (strcmp(platform, 'Jetson Nano'))
     newcolors = [0 0.7 0];
@@ -152,7 +156,7 @@ else
     
     for i=2:2:10
         y = [y; averageFPS(i+1),averageFPS(i)];
-    end
+    end   
 end
 
 % Create the plot
@@ -174,17 +178,26 @@ legend();
 if (strcmp(platform, 'Jetson Nano'))
     xtips = barChart(1).XEndPoints;
     ytips = barChart(1).YEndPoints;
-    labels = string(barChart(1).YData);
+    labels = strings([1,11]);
+    for i=1:11
+        labels(i) = num2str(barChart(1).YData(i), '%.3f');
+    end    
     text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 else
     xtips = barChart(1).XEndPoints;
-    ytips = barChart(1).YEndPoints;
-    labels = string(int8(barChart(1).YData));
+    ytips = barChart(1).YEndPoints;        
+    labels = strings([1,11]);    
+    for i=1:11
+        labels(i) = num2str(barChart(1).YData(i), '%.1f');
+    end    
     text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 
     xtips = barChart(2).XEndPoints;
-    ytips = barChart(2).YEndPoints;
-    labels = string(int8(barChart(2).YData));
+    ytips = barChart(2).YEndPoints;    
+    labels = strings([1,11]);
+    for i=1:11
+        labels(i) = num2str(barChart(2).YData(i), '%.1f');
+    end    
     text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 end
 

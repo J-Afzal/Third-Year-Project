@@ -63,7 +63,7 @@ for i=1:numberOfTests
     legend(' Windows 10 Desktop', ' Ubuntu 20.04 Desktop', ' Jetson Nano', 'location','southoutside');
 
     outputVideo = VideoWriter(strcat(testFiles(i).folder, '\..\', videoLocation, testFiles(i).name), 'MPEG-4');
-    outputVideo.FrameRate = videoFPS;    
+    outputVideo.FrameRate = videoFPS;
     open(outputVideo);
     
     for j=1:numberOfDataPoints

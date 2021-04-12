@@ -124,7 +124,7 @@ end
 
 %% Frame Times
 figure1 = figure;
-set(gcf, 'Position', [100, 100, 850, 700]);
+set(gcf, 'Position',  [100, 100, 1250, 750]);
 
 % Colour of each platform
 newcolors = [0.25 0.5 1
@@ -151,11 +151,11 @@ legend(' Windows 10 Desktop', ' Ubuntu 20.04 Desktop', ' Jetson Nano', 'location
 
 % Save to .png
 f = gcf;
-exportgraphics(f, 'Graphs/All Platforms Frame Time Plot.png');
+exportgraphics(f, 'Graphs/All Platforms Frame Time Plots.png');
 
 %% FPS Values
 figure2 = figure;
-set(gcf, 'Position',  [1050, 100, 850, 700]);
+set(gcf, 'Position',  [100, 100, 1250, 750]);
 
 % Colour of each platform
 newcolors = [0.25 0.5 1
@@ -177,7 +177,7 @@ for i=2:6
 end
 
 % Create the plot
-barChart = bar(x,y);
+barChart = bar(x,y,0.5);
 set(barChart, {'DisplayName'}, {' Windows 10 Desktop', ' Ubuntu 20.04 Desktop', ' Jetson Nano'}');
 xlabel('YOLOv4 Type');
 ylabel('Frames per second (FPS)');
@@ -189,22 +189,31 @@ legend();
 % Display the value of each bar on top of the each bar
 xtips = barChart(1).XEndPoints;
 ytips = barChart(1).YEndPoints;
-labels = string(int8(barChart(1).YData));
+labels = strings([1,11]);
+for i=1:11
+    labels(i) = num2str(barChart(1).YData(i), '%.1f');
+end    
 text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 
 xtips = barChart(2).XEndPoints;
 ytips = barChart(2).YEndPoints;
-labels = string(int8(barChart(2).YData));
+labels = strings([1,11]);
+for i=1:11
+    labels(i) = num2str(barChart(2).YData(i), '%.1f');
+end
 text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 
 xtips = barChart(3).XEndPoints;
 ytips = barChart(3).YEndPoints;
-labels = string(int8(barChart(3).YData));
+labels = strings([1,11]);
+for i=1:11
+    labels(i) = num2str(barChart(3).YData(i), '%.1f');
+end
 text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 
 % Save to .png
 f = gcf;
-exportgraphics(f, 'Graphs/All Platforms FPS Plot.png');
+exportgraphics(f, 'Graphs/All Platforms FPS Plots.png');
 
-% clear variables;
-% close all;
+clear variables;
+close all;

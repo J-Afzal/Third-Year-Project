@@ -12,7 +12,7 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	cv::VideoCapture video("../media/benchmark.mp4");
+	cv::VideoCapture video("../../../3. Videos/Vertical Lanes/All.mp4");
 	//cv::VideoCapture video(0);
 	video.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	video.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
@@ -974,7 +974,7 @@ int main(void)
 
 				// If record toggle is spammed then files can be overwritten but this is not
 				// a problem as the files will be very small and contain no useful information
-				ouputVideo.open("../media/" + currentTime + " Video.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(1920, 1080), true);
+				ouputVideo.open("../media/" + currentTime + " Video.mp4", cv::VideoWriter::fourcc('m', 'p', '4', 'v'), 30, cv::Size(VIDEO_WIDTH, VIDEO_HEIGHT), true);
 				if (!ouputVideo.isOpened())
 				{
 					std::cout << "\nError opening video writer object\n";
