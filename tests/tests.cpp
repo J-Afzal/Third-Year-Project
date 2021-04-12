@@ -31,11 +31,11 @@ int main(void)
 	int numberOfTests = 21;
 	int frameCount = 1155;
 
-	std::string platformDirectory = "../tests/Ouput For Windows 10 Desktop/";
+	//std::string platformDirectory = "../tests/Ouput For Windows 10 Desktop/";
 	//std::string platformDirectory = "../tests/Output For Ubuntu 20.04 Desktop/";
 	//std::string platformDirectory = "../tests/Output For Jetson Nano/";
 
-	bool saveResults = false;
+	bool saveResults = true;
 
 	// Variables that will change
 	std::vector<bool> yolo =
@@ -283,14 +283,12 @@ int main(void)
 				std::cout << "\nError opening coco.names file stream or file\n";
 				return -3;
 			}
-
+			
 			// Setup the YOLO CUDA OpenCV DNN
 			cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4.cfg", "../yolo/yolov4.weights");
 			net.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
 			net.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
 			std::vector<std::string> unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
-
-
 
 			// Hard-Coded Parameters
 			// Lane Region of interest (ROI)
@@ -508,110 +506,112 @@ int main(void)
 				cv::HoughLinesP(cannyFrame, houghLines, 1, CV_PI / 180, HOUGHP_THRESHOLD, HOUGHP_MIN_LINE_LENGTH, HOUGHP_MAX_LINE_GAP);
 
 
-
-				// YOLO Detection for object bounding boxes as they are used in Hough line analysis
-				cv::dnn::blobFromImage(frame, blobFromImg, 1 / 255.0, cv::Size(BLOB_SIZE, BLOB_SIZE), cv::Scalar(0), true, false, CV_32F);
-				net.setInput(blobFromImg);
-				net.forward(outputBlobs, unconnectedOutLayersNames);
-
-				// Go through all output blobs and only allow those with confidence above threshold
-				for (i = 0; i < outputBlobs.size(); i++)
+				if (yolo[testNumber])
 				{
-					for (j = 0; j < outputBlobs[i].rows; j++)
-					{
-						// rows represent number/ID of the detected objects (proposed region)
-						// so loop over number/ID of detected objects.
+						// YOLO Detection for object bounding boxes as they are used in Hough line analysis
+						cv::dnn::blobFromImage(frame, blobFromImg, 1 / 255.0, cv::Size(BLOB_SIZE, BLOB_SIZE), cv::Scalar(0), true, false, CV_32F);
+						net.setInput(blobFromImg);
+						net.forward(outputBlobs, unconnectedOutLayersNames);
 
-						// for each row, the score is from element 5 up
-						// to number of classes index (5 - N columns)
-						// [x, y, w, h, confidence for class 1, confidence for class 2, ...]
-						// minMacLoc gives the max value and its location, i.e. its classID
-						cv::minMaxLoc(outputBlobs[i].row(j).colRange(5, outputBlobs[i].cols), NULL, &confidence, NULL, &classID);
-
-						if (confidence > YOLO_CONFIDENCE_THRESHOLD)
+						// Go through all output blobs and only allow those with confidence above threshold
+						for (i = 0; i < outputBlobs.size(); i++)
 						{
-							// Get the four int values from output blob for bounding box
-							centerX = outputBlobs[i].at<float>(j, 0) * (double)VIDEO_WIDTH;
-							centerY = outputBlobs[i].at<float>(j, 1) * (double)VIDEO_HEIGHT;
-							width = outputBlobs[i].at<float>(j, 2) * (double)VIDEO_WIDTH + BOUNDING_BOX_BUFFER;
-							height = outputBlobs[i].at<float>(j, 3) * (double)VIDEO_HEIGHT + BOUNDING_BOX_BUFFER;
-
-							// Remove object detections on the hood of car
-							if (centerY < ROI_BOTTOM_HEIGHT)
+							for (j = 0; j < outputBlobs[i].rows; j++)
 							{
-								preNMSObjectBoundingBoxes.push_back(cv::Rect(centerX - width / 2, centerY - height / 2, width, height));
-								preNMSObjectNames.push_back(modelIntsAndNames[classID.x]);
-								preNMSObjectConfidences.push_back(confidence);
+								// rows represent number/ID of the detected objects (proposed region)
+								// so loop over number/ID of detected objects.
 
+								// for each row, the score is from element 5 up
+								// to number of classes index (5 - N columns)
+								// [x, y, w, h, confidence for class 1, confidence for class 2, ...]
+								// minMacLoc gives the max value and its location, i.e. its classID
+								cv::minMaxLoc(outputBlobs[i].row(j).colRange(5, outputBlobs[i].cols), NULL, &confidence, NULL, &classID);
+
+								if (confidence > YOLO_CONFIDENCE_THRESHOLD)
+								{
+									// Get the four int values from output blob for bounding box
+									centerX = outputBlobs[i].at<float>(j, 0) * (double)VIDEO_WIDTH;
+									centerY = outputBlobs[i].at<float>(j, 1) * (double)VIDEO_HEIGHT;
+									width = outputBlobs[i].at<float>(j, 2) * (double)VIDEO_WIDTH + BOUNDING_BOX_BUFFER;
+									height = outputBlobs[i].at<float>(j, 3) * (double)VIDEO_HEIGHT + BOUNDING_BOX_BUFFER;
+
+									// Remove object detections on the hood of car
+									if (centerY < ROI_BOTTOM_HEIGHT)
+									{
+										preNMSObjectBoundingBoxes.push_back(cv::Rect(centerX - width / 2, centerY - height / 2, width, height));
+										preNMSObjectNames.push_back(modelIntsAndNames[classID.x]);
+										preNMSObjectConfidences.push_back(confidence);
+
+									}
+								}
 							}
 						}
-					}
-				}
 
-				// Apply non-maxima suppression to supress overlapping bounding boxes
-				// For objects that overlap, the highest confidence object will be chosen
-				cv::dnn::NMSBoxes(preNMSObjectBoundingBoxes, preNMSObjectConfidences, 0.0, YOLO_NMS_THRESHOLD, indicesAfterNMS);
+						// Apply non-maxima suppression to supress overlapping bounding boxes
+						// For objects that overlap, the highest confidence object will be chosen
+						cv::dnn::NMSBoxes(preNMSObjectBoundingBoxes, preNMSObjectConfidences, 0.0, YOLO_NMS_THRESHOLD, indicesAfterNMS);
 
-				// boundingBoxes.size() = classIDs.size() = confidences.size()
-				// Expect only the objects that dont overlap
-				for (i = 0; i < indicesAfterNMS.size(); i++)
-				{
-					objectBoundingBoxes.push_back(preNMSObjectBoundingBoxes[indicesAfterNMS[i]]);
-					objectNames.push_back(preNMSObjectNames[indicesAfterNMS[i]]);
-					objectConfidences.push_back(preNMSObjectConfidences[indicesAfterNMS[i]]);
+						// boundingBoxes.size() = classIDs.size() = confidences.size()
+						// Expect only the objects that dont overlap
+						for (i = 0; i < indicesAfterNMS.size(); i++)
+						{
+							objectBoundingBoxes.push_back(preNMSObjectBoundingBoxes[indicesAfterNMS[i]]);
+							objectNames.push_back(preNMSObjectNames[indicesAfterNMS[i]]);
+							objectConfidences.push_back(preNMSObjectConfidences[indicesAfterNMS[i]]);
 
-					// Print object bounding boxes, object names and object confidences to the frame
-					// This happens first so that the bounding boxes do not go over the UI
-					trafficLightState = "";
+							// Print object bounding boxes, object names and object confidences to the frame
+							// This happens first so that the bounding boxes do not go over the UI
+							trafficLightState = "";
 
-					if (objectNames.back() == "traffic light")
-					{
-						srcTrafficLight.clear();
-						srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y));
-						srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x + objectBoundingBoxes.back().width, objectBoundingBoxes.back().y));
-						srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y + objectBoundingBoxes.back().height));
-						srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x + objectBoundingBoxes.back().width, objectBoundingBoxes.back().y + objectBoundingBoxes.back().height));
+							if (objectNames.back() == "traffic light")
+							{
+								srcTrafficLight.clear();
+								srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y));
+								srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x + objectBoundingBoxes.back().width, objectBoundingBoxes.back().y));
+								srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y + objectBoundingBoxes.back().height));
+								srcTrafficLight.push_back(cv::Point2f(objectBoundingBoxes.back().x + objectBoundingBoxes.back().width, objectBoundingBoxes.back().y + objectBoundingBoxes.back().height));
 
-						dstTrafficLight.clear();
-						dstTrafficLight.push_back(cv::Point2f(0, 0));
-						dstTrafficLight.push_back(cv::Point2f(100, 0));
-						dstTrafficLight.push_back(cv::Point2f(0, 200));
-						dstTrafficLight.push_back(cv::Point2f(100, 200));
+								dstTrafficLight.clear();
+								dstTrafficLight.push_back(cv::Point2f(0, 0));
+								dstTrafficLight.push_back(cv::Point2f(100, 0));
+								dstTrafficLight.push_back(cv::Point2f(0, 200));
+								dstTrafficLight.push_back(cv::Point2f(100, 200));
 
-						// To warp perspective to only contain traffic light but only on the un-edited frame so no bounding boxes shown
-						cv::warpPerspective(unEditedFrame, warpedimage, cv::getPerspectiveTransform(srcTrafficLight, dstTrafficLight, 0), cv::Size(100, 200));
+								// To warp perspective to only contain traffic light but only on the un-edited frame so no bounding boxes shown
+								cv::warpPerspective(unEditedFrame, warpedimage, cv::getPerspectiveTransform(srcTrafficLight, dstTrafficLight, 0), cv::Size(100, 200));
 
-						// count the number of green pixels
-						cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
-						cv::inRange(ImageInHSV, cv::Scalar(32, 32, 32), cv::Scalar(80, 255, 255), ImageInHSV);
-						NonZeroPixelsInGreen = cv::countNonZero(ImageInHSV);
+								// count the number of green pixels
+								cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
+								cv::inRange(ImageInHSV, cv::Scalar(32, 32, 32), cv::Scalar(80, 255, 255), ImageInHSV);
+								NonZeroPixelsInGreen = cv::countNonZero(ImageInHSV);
 
-						// count the number of red pixels
-						cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
-						cv::inRange(ImageInHSV, cv::Scalar(0, 64, 64), cv::Scalar(10, 255, 255), ImageInHSV);
-						NonZeroPixelsInRed = cv::countNonZero(ImageInHSV);
+								// count the number of red pixels
+								cv::cvtColor(warpedimage, ImageInHSV, cv::COLOR_BGR2HSV);
+								cv::inRange(ImageInHSV, cv::Scalar(0, 64, 64), cv::Scalar(10, 255, 255), ImageInHSV);
+								NonZeroPixelsInRed = cv::countNonZero(ImageInHSV);
 
-						if ((NonZeroPixelsInGreen > NonZeroPixelsInRed) && (NonZeroPixelsInGreen > 1000))
-							trafficLightState = " (Green)";
-						else if ((NonZeroPixelsInRed > NonZeroPixelsInGreen) && (NonZeroPixelsInRed > 1000))
-							trafficLightState = " (Red)";
-					}
+								if ((NonZeroPixelsInGreen > NonZeroPixelsInRed) && (NonZeroPixelsInGreen > 1000))
+									trafficLightState = " (Green)";
+								else if ((NonZeroPixelsInRed > NonZeroPixelsInGreen) && (NonZeroPixelsInRed > 1000))
+									trafficLightState = " (Red)";
+							}
 
-					// Draw rectangle around detected object with the correct colour
-					cv::rectangle(frame, objectBoundingBoxes.back(), modelNamesAndColourList[objectNames.back()], 1, cv::LINE_AA);
+							// Draw rectangle around detected object with the correct colour
+							cv::rectangle(frame, objectBoundingBoxes.back(), modelNamesAndColourList[objectNames.back()], 1, cv::LINE_AA);
 
-					// Construct the correct name of object with confidence
-					std::string name = objectNames.back() + ": " + std::to_string((int)(100 * objectConfidences.back())) + "%" + trafficLightState;
-					int size;
-					// This auto adjusts the background box to be the same size as 'name' expect
-					// if name is smaller than object rectangle width, where it will be the same
-					// size as object rectangle width
-					if (objectBoundingBoxes.back().width > name.size() * 9)
-						size = objectBoundingBoxes.back().width;
-					else
-						size = name.size() * 9;
-					cv::rectangle(frame, cv::Rect(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 15, size, 15), modelNamesAndColourList[objectNames.back()], cv::FILLED, cv::LINE_AA);
-					cv::putText(frame, name, cv::Point(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 2), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0), 1, cv::LINE_AA);
+							// Construct the correct name of object with confidence
+							std::string name = objectNames.back() + ": " + std::to_string((int)(100 * objectConfidences.back())) + "%" + trafficLightState;
+							int size;
+							// This auto adjusts the background box to be the same size as 'name' expect
+							// if name is smaller than object rectangle width, where it will be the same
+							// size as object rectangle width
+							if (objectBoundingBoxes.back().width > name.size() * 9)
+								size = objectBoundingBoxes.back().width;
+							else
+								size = name.size() * 9;
+							cv::rectangle(frame, cv::Rect(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 15, size, 15), modelNamesAndColourList[objectNames.back()], cv::FILLED, cv::LINE_AA);
+							cv::putText(frame, name, cv::Point(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 2), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0), 1, cv::LINE_AA);
+						}
 				}
 
 
