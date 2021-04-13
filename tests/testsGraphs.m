@@ -22,7 +22,7 @@ if (strcmp(platform,'Jetson Nano'))
 else
     numberOfFiles = 21;
 end
-numberOfDataPoints = 1155-1; % Ignore first frame due to being very high
+numberOfDataPoints = 1155; % Ignore first frame due to being very high
 x = 1:1:numberOfDataPoints;
 
 % Read in files
@@ -38,7 +38,7 @@ end
 % Remove the first frame
 filesData = cell(numberOfFiles, 1);
 for i=1:numberOfFiles
-    k=2;
+    k=1;
     for j=1:numberOfDataPoints
         filesData{i}(j) = nonEditedFilesData{i}(k);
         k = k + 1;
@@ -104,7 +104,7 @@ xlabel('Frame Number');
 ylabel('Time to compute frame (ms)');
 axis tight;
 if (strcmp(platform, 'Jetson Nano'))
-    ylim([0 1300]);
+    ylim([0 1400]);
 else
     ylim([0 300]);
 end

@@ -144,7 +144,7 @@ end
 xlabel('Frame Number');
 ylabel('Time to compute frame (ms)');
 axis tight;
-ylim([0 1300]);
+ylim([0 1400]);
 grid on;
 title('All Platforms Frame Time Plot');
 legend(' Windows 10 Desktop', ' Ubuntu 20.04 Desktop', ' Jetson Nano', 'location','southoutside');

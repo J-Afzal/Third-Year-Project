@@ -57,7 +57,7 @@ for i=1:numberOfTests
     % Graph props
     xlabel('Frame Number');
     ylabel('Time to compute frame (ms)');
-    xlim([0 1155]);
+    xlim([0 1154]);
     grid on;
     title(strcat('Frame times for ', {' '}, testFiles(i).name), 'Interpreter', 'none');
     legend(' Windows 10 Desktop', ' Ubuntu 20.04 Desktop', ' Jetson Nano', 'location','southoutside');
@@ -66,7 +66,7 @@ for i=1:numberOfTests
     outputVideo.FrameRate = videoFPS;
     open(outputVideo);
     
-    for j=1:numberOfDataPoints
+    for j=2:numberOfDataPoints
         addpoints(windowsLine, x(j),windowsFilesData{i}(j));
         addpoints(ubuntuLine, x(j),ubuntuFilesData{i}(j));
         addpoints(jetsonLine, x(j),jetsonFilesData{i}(j));
