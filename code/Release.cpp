@@ -265,24 +265,6 @@ int main(void)
 
 
 
-		// Populate blankFrame with zeros (all black) and
-		// then create a white mask that is the same size as ROI
-		blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
-		cv::fillConvexPoly(blankFrame, maskDimensions, cv::Scalar(255, 255, 255), cv::LINE_AA, 0);
-		// Then AND blankFrame with frame to extract ROI from frame
-		cv::bitwise_and(blankFrame, frame, ROIFrame);
-
-		// Convert to gray scale for canny algorithm
-		cv::cvtColor(ROIFrame, ROIFrame, cv::COLOR_BGR2GRAY);
-
-		// Canny algorithm to detect edges
-		cv::Canny(ROIFrame, cannyFrame, CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD, 3, true);
-
-		// Probabilistic Hough Line Transform to detect lines
-		cv::HoughLinesP(cannyFrame, houghLines, 1, CV_PI / 180, HOUGHP_THRESHOLD, HOUGHP_MIN_LINE_LENGTH, HOUGHP_MAX_LINE_GAP);
-
-
-
 		// YOLO Detection for object bounding boxes as they are used in Hough line analysis
 		cv::dnn::blobFromImage(frame, blobFromImg, 1 / 255.0, cv::Size(BLOB_SIZE, BLOB_SIZE), cv::Scalar(0), true, false, CV_32F);
 		net.setInput(blobFromImg);
@@ -387,6 +369,24 @@ int main(void)
 			cv::rectangle(frame, cv::Rect(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 15, size, 15), modelNamesAndColourList[objectNames.back()], cv::FILLED, cv::LINE_AA);
 			cv::putText(frame, name, cv::Point(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 2), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0), 1, cv::LINE_AA);
 		}
+
+
+
+		// Populate blankFrame with zeros (all black) and
+		// then create a white mask that is the same size as ROI
+		blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
+		cv::fillConvexPoly(blankFrame, maskDimensions, cv::Scalar(255, 255, 255), cv::LINE_AA, 0);
+		// Then AND blankFrame with frame to extract ROI from frame
+		cv::bitwise_and(blankFrame, frame, ROIFrame);
+
+		// Convert to gray scale for canny algorithm
+		cv::cvtColor(ROIFrame, ROIFrame, cv::COLOR_BGR2GRAY);
+
+		// Canny algorithm to detect edges
+		cv::Canny(ROIFrame, cannyFrame, CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD, 3, true);
+
+		// Probabilistic Hough Line Transform to detect lines
+		cv::HoughLinesP(cannyFrame, houghLines, 1, CV_PI / 180, HOUGHP_THRESHOLD, HOUGHP_MIN_LINE_LENGTH, HOUGHP_MAX_LINE_GAP);
 
 
 

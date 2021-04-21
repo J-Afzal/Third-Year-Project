@@ -276,61 +276,6 @@ int main(void)
 
 
 
-		// Calculate the mask dimensions
-		maskDimensions.push_back(cv::Point(frame.cols / 2 - ROI_TOP_WIDTH / 2, ROI_TOP_HEIGHT));
-		maskDimensions.push_back(cv::Point(frame.cols / 2 + ROI_TOP_WIDTH / 2, ROI_TOP_HEIGHT));
-		maskDimensions.push_back(cv::Point(frame.cols / 2 + ROI_BOTTOM_WIDTH / 2, ROI_BOTTOM_HEIGHT));
-		maskDimensions.push_back(cv::Point(frame.cols / 2 - ROI_BOTTOM_WIDTH / 2, ROI_BOTTOM_HEIGHT));
-
-		// Left edge of mask
-		mLeftEdgeOfMask = ((double)maskDimensions[0].y - (double)maskDimensions[3].y) / (double)((double)maskDimensions[0].x - (double)maskDimensions[3].x);
-		cLeftEdgeOfMask = maskDimensions[0].y - mLeftEdgeOfMask * maskDimensions[0].x;
-
-		// Right edge of mask
-		mRightEdgeOfMask = ((double)maskDimensions[1].y - (double)maskDimensions[2].y) / (double)((double)maskDimensions[1].x - (double)maskDimensions[2].x);
-		cRightEdgeOfMask = maskDimensions[1].y - mRightEdgeOfMask * maskDimensions[1].x;
-
-		// Find the midpoint of top and the 1/3 point on the bottom of ROI
-		topMidPoint = maskDimensions[0].x + ((double)maskDimensions[1].x - (double)maskDimensions[0].x) / 2.;
-		bottomOneThird = maskDimensions[3].x + ((double)maskDimensions[2].x - (double)maskDimensions[3].x) / 3.;
-		bottomTwoThird = maskDimensions[3].x + 2. * ((double)maskDimensions[2].x - (double)maskDimensions[3].x) / 3.;
-
-		// Then find eqn of the lines
-		// left threshold
-		mLeftThresholdEdge = ((double)ROI_TOP_HEIGHT - (double)ROI_BOTTOM_HEIGHT) / (topMidPoint - bottomOneThird);
-		cLeftThresholdEdge = ROI_TOP_HEIGHT - mLeftThresholdEdge * topMidPoint;
-
-		// right threshold
-		mRightThresholdEdge = ((double)ROI_TOP_HEIGHT - (double)ROI_BOTTOM_HEIGHT) / (topMidPoint - bottomTwoThird);
-		cRightThresholdEdge = ROI_TOP_HEIGHT - mRightThresholdEdge * topMidPoint;
-
-
-
-		// Populate blankFrame with zeros (all black) and
-		// then create a white mask that is the same size as ROI
-		blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
-		cv::fillConvexPoly(blankFrame, maskDimensions, cv::Scalar(255, 255, 255), cv::LINE_AA, 0);
-		// Then AND blankFrame with frame to extract ROI from frame
-		cv::bitwise_and(blankFrame, frame, ROIFrame);
-
-		// Convert to gray scale for canny algorithm
-		cv::cvtColor(ROIFrame, ROIFrame, cv::COLOR_BGR2GRAY);
-
-		// Canny algorithm to detect edges
-		cv::Canny(ROIFrame, cannyFrame, CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD, 3, true);
-
-		// Probabilistic Hough Line Transform to detect lines
-		cv::HoughLinesP(cannyFrame, houghLines, 1, CV_PI / 180, HOUGHP_THRESHOLD, HOUGHP_MIN_LINE_LENGTH, HOUGHP_MAX_LINE_GAP);
-
-		// Make the houghFrame a blank black frame
-		houghFrame = cv::Mat::zeros(frame.rows, frame.cols, frame.type());
-
-		// Draw thresholds for left, middle and right lines on the houghFrame
-		cv::line(houghFrame, cv::Point((ROI_BOTTOM_HEIGHT - cLeftThresholdEdge) / mLeftThresholdEdge, ROI_BOTTOM_HEIGHT), cv::Point((ROI_TOP_HEIGHT - cLeftThresholdEdge) / mLeftThresholdEdge, ROI_TOP_HEIGHT), cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
-		cv::line(houghFrame, cv::Point((ROI_BOTTOM_HEIGHT - cRightThresholdEdge) / mRightThresholdEdge, ROI_BOTTOM_HEIGHT), cv::Point((ROI_TOP_HEIGHT - cRightThresholdEdge) / mRightThresholdEdge, ROI_TOP_HEIGHT), cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
-
-
-
 		// YOLO Detection for object bounding boxes as they are used in Hough line analysis
 		cv::dnn::blobFromImage(frame, blobFromImg, 1 / 255.0, cv::Size(BLOB_SIZE, BLOB_SIZE), cv::Scalar(0), true, false, CV_32F);
 		net.setInput(blobFromImg);
@@ -435,6 +380,61 @@ int main(void)
 			cv::rectangle(frame, cv::Rect(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 15, size, 15), modelNamesAndColourList[objectNames.back()], cv::FILLED, cv::LINE_AA);
 			cv::putText(frame, name, cv::Point(objectBoundingBoxes.back().x, objectBoundingBoxes.back().y - 2), cv::FONT_HERSHEY_DUPLEX, 0.5, cv::Scalar(0), 1, cv::LINE_AA);
 		}
+
+
+
+		// Calculate the mask dimensions
+		maskDimensions.push_back(cv::Point(frame.cols / 2 - ROI_TOP_WIDTH / 2, ROI_TOP_HEIGHT));
+		maskDimensions.push_back(cv::Point(frame.cols / 2 + ROI_TOP_WIDTH / 2, ROI_TOP_HEIGHT));
+		maskDimensions.push_back(cv::Point(frame.cols / 2 + ROI_BOTTOM_WIDTH / 2, ROI_BOTTOM_HEIGHT));
+		maskDimensions.push_back(cv::Point(frame.cols / 2 - ROI_BOTTOM_WIDTH / 2, ROI_BOTTOM_HEIGHT));
+
+		// Left edge of mask
+		mLeftEdgeOfMask = ((double)maskDimensions[0].y - (double)maskDimensions[3].y) / (double)((double)maskDimensions[0].x - (double)maskDimensions[3].x);
+		cLeftEdgeOfMask = maskDimensions[0].y - mLeftEdgeOfMask * maskDimensions[0].x;
+
+		// Right edge of mask
+		mRightEdgeOfMask = ((double)maskDimensions[1].y - (double)maskDimensions[2].y) / (double)((double)maskDimensions[1].x - (double)maskDimensions[2].x);
+		cRightEdgeOfMask = maskDimensions[1].y - mRightEdgeOfMask * maskDimensions[1].x;
+
+		// Find the midpoint of top and the 1/3 point on the bottom of ROI
+		topMidPoint = maskDimensions[0].x + ((double)maskDimensions[1].x - (double)maskDimensions[0].x) / 2.;
+		bottomOneThird = maskDimensions[3].x + ((double)maskDimensions[2].x - (double)maskDimensions[3].x) / 3.;
+		bottomTwoThird = maskDimensions[3].x + 2. * ((double)maskDimensions[2].x - (double)maskDimensions[3].x) / 3.;
+
+		// Then find eqn of the lines
+		// left threshold
+		mLeftThresholdEdge = ((double)ROI_TOP_HEIGHT - (double)ROI_BOTTOM_HEIGHT) / (topMidPoint - bottomOneThird);
+		cLeftThresholdEdge = ROI_TOP_HEIGHT - mLeftThresholdEdge * topMidPoint;
+
+		// right threshold
+		mRightThresholdEdge = ((double)ROI_TOP_HEIGHT - (double)ROI_BOTTOM_HEIGHT) / (topMidPoint - bottomTwoThird);
+		cRightThresholdEdge = ROI_TOP_HEIGHT - mRightThresholdEdge * topMidPoint;
+
+
+
+		// Populate blankFrame with zeros (all black) and
+		// then create a white mask that is the same size as ROI
+		blankFrame = cv::Mat::zeros(VIDEO_HEIGHT, VIDEO_WIDTH, frame.type());
+		cv::fillConvexPoly(blankFrame, maskDimensions, cv::Scalar(255, 255, 255), cv::LINE_AA, 0);
+		// Then AND blankFrame with frame to extract ROI from frame
+		cv::bitwise_and(blankFrame, frame, ROIFrame);
+
+		// Convert to gray scale for canny algorithm
+		cv::cvtColor(ROIFrame, ROIFrame, cv::COLOR_BGR2GRAY);
+
+		// Canny algorithm to detect edges
+		cv::Canny(ROIFrame, cannyFrame, CANNY_LOWER_THRESHOLD, CANNY_UPPER_THRESHOLD, 3, true);
+
+		// Probabilistic Hough Line Transform to detect lines
+		cv::HoughLinesP(cannyFrame, houghLines, 1, CV_PI / 180, HOUGHP_THRESHOLD, HOUGHP_MIN_LINE_LENGTH, HOUGHP_MAX_LINE_GAP);
+
+		// Make the houghFrame a blank black frame
+		houghFrame = cv::Mat::zeros(frame.rows, frame.cols, frame.type());
+
+		// Draw thresholds for left, middle and right lines on the houghFrame
+		cv::line(houghFrame, cv::Point((ROI_BOTTOM_HEIGHT - cLeftThresholdEdge) / mLeftThresholdEdge, ROI_BOTTOM_HEIGHT), cv::Point((ROI_TOP_HEIGHT - cLeftThresholdEdge) / mLeftThresholdEdge, ROI_TOP_HEIGHT), cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
+		cv::line(houghFrame, cv::Point((ROI_BOTTOM_HEIGHT - cRightThresholdEdge) / mRightThresholdEdge, ROI_BOTTOM_HEIGHT), cv::Point((ROI_TOP_HEIGHT - cRightThresholdEdge) / mRightThresholdEdge, ROI_TOP_HEIGHT), cv::Scalar(255, 255, 255), 1, cv::LINE_AA);
 
 
 
