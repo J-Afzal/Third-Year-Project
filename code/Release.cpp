@@ -28,7 +28,7 @@ int main(void)
 	cv::VideoWriter ouputFrameVideo;
 
 	// Read in the coco names
-	// The std::map links model ID with a string and a string with a colour
+	// The std::map links a string with a colour
 	std::vector<std::string> modelNames;
 	std::map<std::string, cv::Scalar> modelNamesAndColourList;
 	std::ifstream modelNamesFile("../yolo/coco.names");

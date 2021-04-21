@@ -254,8 +254,8 @@ int main(void)
 			cv::VideoWriter ouputVideo;
 
 			// Read in the coco names
-			// The std::map links model ID with a string and a string with a colour
-			std::map<int, std::string> modelIntsAndNames;
+			// The std::map links a string with a colour
+			std::vector<std::string> modelNames;
 			std::map<std::string, cv::Scalar> modelNamesAndColourList;
 			std::ifstream modelNamesFile("../yolo/coco.names");
 			if (modelNamesFile.is_open())
@@ -267,7 +267,7 @@ int main(void)
 					line.pop_back();
 					#endif
 					modelNamesAndColourList.insert(std::pair<std::string, cv::Scalar>(line, cv::Scalar(255, 255, 255))); // white
-					modelIntsAndNames.insert(std::pair<int, std::string>(i, line));
+					modelNames.push_back(line);
 				}
 
 				// Set these as custom colours
@@ -545,7 +545,7 @@ int main(void)
 									if (centerY < ROI_BOTTOM_HEIGHT)
 									{
 										preNMSObjectBoundingBoxes.push_back(cv::Rect(centerX - width / 2, centerY - height / 2, width, height));
-										preNMSObjectNames.push_back(modelIntsAndNames[classID.x]);
+										preNMSObjectNames.push_back(modelNames[classID.x]);
 										preNMSObjectConfidences.push_back(confidence);
 
 									}
