@@ -65,6 +65,7 @@ if (strcmp(platform, 'Jetson Nano'))
     colororder(newcolors);
 else
     newcolors = [0 0 0
+                 0 0.7 0
                  0.7 0 0
                  0 0.7 0
                  0.7 0 0
@@ -89,6 +90,7 @@ else
 end
 
 plot(x,filesData{1}, 'LineWidth',0.9);
+hold on;
 
 for i=12:numberOfFiles
     plot(x,filesData{i}, 'LineWidth',0.9);
