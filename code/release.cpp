@@ -12,7 +12,7 @@
 int main(void)
 {
 	// Create a VideoCapture object and open the input video file
-	cv::VideoCapture inputVideo("../media/benchmark.mp4");
+	cv::VideoCapture inputVideo("../media/motorway.mp4");
 	//cv::VideoCapture inputVideo(0);
 	inputVideo.set(cv::CAP_PROP_FRAME_WIDTH, 1920);
 	inputVideo.set(cv::CAP_PROP_FRAME_HEIGHT, 1080);
