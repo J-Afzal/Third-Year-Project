@@ -1,4 +1,4 @@
-%% Junaid Afzal
+%% @Author: Junaid Afzal
 %% Load in data
 clear variables;
 close all;
@@ -80,8 +80,8 @@ for i=2:2:numberOfFiles-1
     else
         windowsMaxFPS(j) = windowsAverageFPS(i+1);
         windowsMaxFilesData{j} = windowsFilesData{i+1};
-    end    
-    
+    end
+
     if (ubuntuAverageFPS(i) > ubuntuAverageFPS(i+1))
         ubuntuMaxFPS(j) = ubuntuAverageFPS(i);
         ubuntuMaxFilesData{j} = ubuntuFilesData{i};
@@ -192,7 +192,7 @@ ytips = barChart(1).YEndPoints;
 labels = strings([1,11]);
 for i=1:11
     labels(i) = num2str(barChart(1).YData(i), '%.1f');
-end    
+end
 text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 
 xtips = barChart(2).XEndPoints;

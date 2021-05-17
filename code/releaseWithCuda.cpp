@@ -1,3 +1,5 @@
+// @Author: Junaid Afzal
+
 #include <iostream>
 #include <fstream>
 #include <math.h>

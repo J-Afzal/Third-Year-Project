@@ -1,4 +1,4 @@
-%% Junaid Afzal
+%% @Author: Junaid Afzal
 %% Load in data
 clear variables;
 close all;
@@ -65,12 +65,12 @@ for i=1:numberOfTests
     outputVideo = VideoWriter(strcat(testFiles(i).folder, '\..\', videoLocation, testFiles(i).name), 'MPEG-4');
     outputVideo.FrameRate = videoFPS;
     open(outputVideo);
-    
+
     for j=2:numberOfDataPoints
         addpoints(windowsLine, x(j),windowsFilesData{i}(j));
         addpoints(ubuntuLine, x(j),ubuntuFilesData{i}(j));
         addpoints(jetsonLine, x(j),jetsonFilesData{i}(j));
-        drawnow limitrate;        
+        drawnow limitrate;
         img = getframe(gcf);
         writeVideo(outputVideo,img)
     end

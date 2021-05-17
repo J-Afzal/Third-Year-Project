@@ -1,4 +1,4 @@
-%% Junaid Afzal
+%% @Author: Junaid Afzal
 %% Load in data
 clear variables;
 close all;
@@ -125,7 +125,7 @@ exportgraphics(f, strcat('Graphs/', platform, ' Frame Time Plot.png'));
 %% FPS plots
 figure2 = figure;
 set(gcf, 'Position',  [100, 100, 1250, 750]);
-    
+
 % Set the colormap to green for CUDA and purple for
 if (strcmp(platform, 'Jetson Nano'))
     newcolors = [0 0.7 0];
@@ -145,20 +145,20 @@ y = [averageFPS(1)];
     for i=7:numberOfFiles
         y = [y;averageFPS(i)];
     end
-    
+
     for i=2:6
         y = [y;averageFPS(i)];
     end
 else
     y = [NaN, averageFPS(1)];
-    
+
     for i=12:2:numberOfFiles
         y = [y; averageFPS(i+1),averageFPS(i)];
     end
-    
+
     for i=2:2:10
         y = [y; averageFPS(i+1),averageFPS(i)];
-    end   
+    end
 end
 
 % Create the plot
@@ -183,23 +183,23 @@ if (strcmp(platform, 'Jetson Nano'))
     labels = strings([1,11]);
     for i=1:11
         labels(i) = num2str(barChart(1).YData(i), '%.3f');
-    end    
+    end
     text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 else
     xtips = barChart(1).XEndPoints;
-    ytips = barChart(1).YEndPoints;        
-    labels = strings([1,11]);    
+    ytips = barChart(1).YEndPoints;
+    labels = strings([1,11]);
     for i=1:11
         labels(i) = num2str(barChart(1).YData(i), '%.1f');
-    end    
+    end
     text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 
     xtips = barChart(2).XEndPoints;
-    ytips = barChart(2).YEndPoints;    
+    ytips = barChart(2).YEndPoints;
     labels = strings([1,11]);
     for i=1:11
         labels(i) = num2str(barChart(2).YData(i), '%.1f');
-    end    
+    end
     text(xtips,ytips,labels,'HorizontalAlignment','center','VerticalAlignment','bottom')
 end
 
