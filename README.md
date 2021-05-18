@@ -95,7 +95,44 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
        ../opencv-4.5.1 && make -j4 && sudo make install -j4
 
 ## Instructions for Setting up Windows 10
+0. Download all pre-requisites
+    * Microsoft Visual Studio
+    * CMake (Add to PATH)
+    * CUDA 11.2
+    * cuDNN 8.1.1
 
+1. Download OpenCV 4.5.1 and OpenCV-contrib 4.5.1, unzipp them, and create a build folder in the same directory
+
+2. Open the CMake GUI and select the unzipped OpenCV 4.5.1 as source directory and the build folder as the build directory and select Microsoft Visual Studio as the compiler
+
+3. Press configure and change:
+    * BUILD_opencv_world=ON
+    * OPENCV_EXTRA_MODULES_PATH to the modules folder in the unzipped OpenCV-contrib 4.5.1
+    * WITH_CUDA=ON
+    * OPENCV_DNN_CUDA=ON
+    * 
+
+4. Press configure again and change:
+    * CUDA_FAST_MATH=ON
+    * For your GPU set the correct GPU arch number and GPU family name
+    * 
+
+5. Press configure, then generate, then open project
+
+6. Build the BUILD and INSTALL solutions
+
+7. For each Microsoft Visual Studio project, go to project properties:
+    * VC++ directories
+      * Include Direcotires 
+        * add {Path to build folder}\install\include
+        * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include
+      * Library Direcotires
+        * add {Path to build folder}\install\x64\vc16\lib
+        * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\lib\x64
+    * Linker
+      * Additional Dependenices
+        * add opencv_world451.lib
+        * add cudart.lib  
 
 ## Running the software
 0. Assuming that you are in the Third-Year-Project/code folder
