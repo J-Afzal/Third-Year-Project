@@ -73,7 +73,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
        unzip opencv_contrib.zip && \
        mkdir build && cd build
 
-5. Build OpenCV with CUDA (make sure there is 4 GB swap memory using jtop and then remove after compilation for the Jetson Nano)
+5. Build OpenCV with CUDA (For the Jetson Nano make sure there is an extra 4 GB (so total 6 GB) of swap memory using jtop and then remove after compilation)
 
        cmake \
        -D CMAKE_BUILD_TYPE=RELEASE \
