@@ -101,7 +101,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
     * CUDA 11.2
     * cuDNN 8.1.1
 
-1. Download OpenCV 4.5.1 and OpenCV-contrib 4.5.1, unzipp them, and create a build folder in the same directory
+1. Download OpenCV 4.5.1 and OpenCV-contrib 4.5.1, unzip them, and create a build folder in the same directory
 
 2. Open the CMake GUI and select the unzipped OpenCV 4.5.1 as source directory and the build folder as the build directory and select Microsoft Visual Studio as the compiler
 
@@ -125,14 +125,14 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 
 7. For each Microsoft Visual Studio project, go to project properties:
     * VC++ directories
-      * Include Direcotires 
+      * Include Directories  
         * add {Path to build folder}\install\include
         * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include
-      * Library Direcotires
+      * Library Directories 
         * add {Path to build folder}\install\x64\vc16\lib
         * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\lib\x64
     * Linker
-      * Additional Dependenices
+      * Additional Dependencies
         * add opencv_world451.lib
         * add cudart.lib  
 
@@ -168,7 +168,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
     * Do step 7 for 'Instructions for Setting up Windows 10'
 
     **Jetson Nano/Ubuntu and Windows 10**
-    * Then grab a screenshot with 's' key presssed
+    * Then grab a screenshot with 's' key pressed
     * Then change desired screenshot name to '0.png'
     * Then change editROIUsingImage = false on line 34 in debug.cpp to true
     * Then change ROI parameters until ROI frame contains only lane information
