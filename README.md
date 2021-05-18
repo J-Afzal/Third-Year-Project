@@ -37,7 +37,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 * Waveshare Metal Case for the Jetson Nano
 * Keyboard & Mouse
 
-## Instructions for Setting up Jetson Nano/Ubuntu Desktop
+## Instructions for Setting up Jetson Nano (3.5hrs)/Ubuntu Desktop (1.5hrs)
 
 0. Setup Jetson Nano (Skip for Ubuntu Desktop)
     * Download NVIDIA Jetpack SDK 4.5.1 from https://developer.nvidia.com/embedded/jetpack 
@@ -94,7 +94,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
        -D OPENCV_EXTRA_MODULES_PATH=/home/main/Downloads/opencv_contrib-4.5.1/modules \
        ../opencv-4.5.1 && make -j4 && sudo make install -j4
 
-## Instructions for Setting up Windows 10
+## Instructions for Setting up Windows 10 (1.5hrs)
 0. Download all pre-requisites
     * Microsoft Visual Studio
     * CMake (Add to PATH)
