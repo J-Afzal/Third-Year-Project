@@ -92,7 +92,11 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
        -D OPENCV_PC_FILE_NAME=opencv.pc \
        -D OPENCV_ENABLE_NONFREE=ON \
        -D OPENCV_EXTRA_MODULES_PATH=/home/main/Downloads/opencv_contrib-4.5.1/modules \
-       ../opencv-4.5.1 && make -j4 && sudo make install -j4
+       ../opencv-4.5.1 && \
+       make -j4 && \
+       sudo make install -j4 && \
+       sudo sh -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf' && \
+       sudo ldconfig
 
 ## Instructions for Setting up Windows 10 (1.5hrs)
 0. Download all pre-requisites
