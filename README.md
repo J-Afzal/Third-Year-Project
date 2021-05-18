@@ -37,7 +37,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 * Waveshare Metal Case for the Jetson Nano
 * Keyboard & Mouse
 
-## Instructions for Setting up Jetson Nano (3.5hrs)/Ubuntu Desktop (1.5hrs)
+## Instructions for Setting up Jetson Nano (4hrs)/Ubuntu Desktop (1.5hrs)
 
 0. Setup Jetson Nano (Skip for Ubuntu Desktop)
     * Download NVIDIA Jetpack SDK 4.5.1 from https://developer.nvidia.com/embedded/jetpack 
