@@ -110,12 +110,14 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
     * OPENCV_EXTRA_MODULES_PATH to the modules folder in the unzipped OpenCV-contrib 4.5.1
     * WITH_CUDA=ON
     * OPENCV_DNN_CUDA=ON
-    * 
+    * ENABLE_FAST_MATH=ON
+    * WITH_TBB=ON
+    * ENABLE_FAST_MATH=1
+    * OPENCV_ENABLE_NONFREE=ON
 
 4. Press configure again and change:
     * CUDA_FAST_MATH=ON
     * For your GPU set the correct GPU arch number and GPU family name
-    * 
 
 5. Press configure, then generate, then open project
 
@@ -137,20 +139,35 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 ## Running the software
 0. Assuming that you are in the Third-Year-Project/code folder
 
-1. Run release.cpp with motorway.mp4 vid
+1. Run release.cpp with motorway.mp4 vid (For windows make sure x64 and release settings have been selected and hit F5 to run)
+
+    **Jetson Nano/Ubuntu**
 
        g++ release.cpp rollingAverage.cpp -O3 -o YOLO_release.out `pkg-config opencv --cflags --libs` && \
        ./YOLO_release.out
 
+    **Windows 10**
+    * Create a Microsoft Visual Studio project
+    * Add release.cpp, rollingAverage.h, rollingAverage.cpp
+    * Do step 7 for 'Instructions for Setting up Windows 10'
+     
 2. If webcam output desired, then change line 15 in release.cpp from (However, make sure the lane is within the ROI frame, which is in the centre of the frame and slightly down):
    
    `cv::VideoCapture inputVideo("../media/motorway.mp4");` to `cv::VideoCapture inputVideo(0);`
 
 3. Or debug.cpp can be ran to adjust the ROI position by running the following:
+     
+    **Jetson Nano/Ubuntu**
 
        g++ debug.cpp rollingAverage.cpp -O3 -o YOLO_debug.out `pkg-config opencv --cflags --libs` && \
        ./YOLO_debug.out
 
+    **Windows 10**
+    * Create a Microsoft Visual Studio project
+    * Add debug.cpp, rollingAverage.h, rollingAverage.cpp
+    * Do step 7 for 'Instructions for Setting up Windows 10'
+
+    **Jetson Nano/Ubuntu and Windows 10**
     * Then grab a screenshot with 's' key presssed
     * Then change desired screenshot name to '0.png'
     * Then change editROIUsingImage = false on line 34 in debug.cpp to true
