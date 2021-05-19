@@ -21,7 +21,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 * `Software Analysis for No YOLOv4` shows the frame times for the software and that peaks occur during lane detection when many road markings picked up in the ROI frame
 * `A Potential Curved Road Solution` shows solution to curved roads and you should compare quality of lane detection with previous video and pay attention to how the ROI frame moves at the top left
 
-## Performance of Software
+## Performance of the Software
 <p align="center">
  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/tests/Graphs/All%20Platforms%20FPS%20Plots.png">
 </p>
@@ -43,7 +43,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 * Waveshare Metal Case for the Jetson Nano
 * Keyboard & Mouse
 
-## Instructions for Setting up Jetson Nano (4hrs)/Ubuntu Desktop (1.5hrs)
+## Instructions for Setting up the Jetson Nano (4hrs) / Ubuntu Desktop (1.5hrs)
 
 0. Setup Jetson Nano (Skip for Ubuntu Desktop)
     * Download NVIDIA Jetpack SDK 4.5.1 from https://developer.nvidia.com/embedded/jetpack 
