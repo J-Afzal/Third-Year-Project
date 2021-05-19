@@ -43,6 +43,47 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 * Waveshare Metal Case for the Jetson Nano
 * Keyboard & Mouse
 
+## Instructions for Setting up Windows 10 (1.5hrs)
+0. Download all pre-requisites
+    * Microsoft Visual Studio
+    * CMake (Add to PATH)
+    * CUDA 11.2
+    * cuDNN 8.1.1
+
+1. Download OpenCV 4.5.1 and OpenCV-contrib 4.5.1, unzip them, and create a build folder in the same directory
+
+2. Open the CMake GUI and select the unzipped OpenCV 4.5.1 as source directory and the build folder as the build directory and select Microsoft Visual Studio as the compiler
+
+3. Press configure and change:
+    * BUILD_opencv_world=ON
+    * OPENCV_EXTRA_MODULES_PATH to the modules folder in the unzipped OpenCV-contrib 4.5.1
+    * WITH_CUDA=ON
+    * OPENCV_DNN_CUDA=ON
+    * ENABLE_FAST_MATH=ON
+    * WITH_TBB=ON
+    * OPENCV_ENABLE_NONFREE=ON
+
+4. Press configure again and change:
+    * CUDA_FAST_MATH=ON
+    * For your GPU set the correct GPU arch number and GPU family name
+
+5. Press configure, then generate, then open project
+
+6. Build the BUILD and INSTALL solutions
+
+7. For each Microsoft Visual Studio project, go to project properties:
+    * VC++ directories
+      * Include Directories  
+        * add {Path to build folder}\install\include
+        * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include
+      * Library Directories 
+        * add {Path to build folder}\install\x64\vc16\lib
+        * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\lib\x64
+    * Linker
+      * Additional Dependencies
+        * add opencv_world451.lib
+        * add cudart.lib  
+
 ## Instructions for Setting up the Jetson Nano (4hrs) / Ubuntu Desktop (1.5hrs)
 
 0. Setup Jetson Nano (Skip for Ubuntu Desktop)
@@ -103,48 +144,6 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
        sudo make install -j4 && \
        sudo sh -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf' && \
        sudo ldconfig
-
-## Instructions for Setting up Windows 10 (1.5hrs)
-0. Download all pre-requisites
-    * Microsoft Visual Studio
-    * CMake (Add to PATH)
-    * CUDA 11.2
-    * cuDNN 8.1.1
-
-1. Download OpenCV 4.5.1 and OpenCV-contrib 4.5.1, unzip them, and create a build folder in the same directory
-
-2. Open the CMake GUI and select the unzipped OpenCV 4.5.1 as source directory and the build folder as the build directory and select Microsoft Visual Studio as the compiler
-
-3. Press configure and change:
-    * BUILD_opencv_world=ON
-    * OPENCV_EXTRA_MODULES_PATH to the modules folder in the unzipped OpenCV-contrib 4.5.1
-    * WITH_CUDA=ON
-    * OPENCV_DNN_CUDA=ON
-    * ENABLE_FAST_MATH=ON
-    * WITH_TBB=ON
-    * ENABLE_FAST_MATH=1
-    * OPENCV_ENABLE_NONFREE=ON
-
-4. Press configure again and change:
-    * CUDA_FAST_MATH=ON
-    * For your GPU set the correct GPU arch number and GPU family name
-
-5. Press configure, then generate, then open project
-
-6. Build the BUILD and INSTALL solutions
-
-7. For each Microsoft Visual Studio project, go to project properties:
-    * VC++ directories
-      * Include Directories  
-        * add {Path to build folder}\install\include
-        * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include
-      * Library Directories 
-        * add {Path to build folder}\install\x64\vc16\lib
-        * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\lib\x64
-    * Linker
-      * Additional Dependencies
-        * add opencv_world451.lib
-        * add cudart.lib  
 
 ## Running the software
 0. Assuming that you are in the Third-Year-Project/code folder
