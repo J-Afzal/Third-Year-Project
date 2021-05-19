@@ -1,12 +1,18 @@
 ## Screenshots from the Real World Test
 <p align="center">
- <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Ouput%201.jpg">
+ <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%201.png">
 </p>
 <p align="center">
- <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Ouput%202.jpg">
+ <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%202.png">
 </p>
 <p align="center">
- <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Ouput%203.jpg">
+ <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%203.png">
+</p>
+<p align="center">
+ <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Bonnet%201.png">
+</p>
+<p align="center">
+ <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Bonnet%202.png">
 </p>
 
 The YouTube playlist for this project can be found [here](https://youtube.com/playlist?list=PLFJGOGaRWoxDm-Em5-mNv7JbYHmCRMm9b):
