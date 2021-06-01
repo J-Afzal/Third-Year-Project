@@ -177,12 +177,12 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
     * Do step 7 for 'Instructions for Setting up Windows 10'
 
     **Jetson Nano/Ubuntu and Windows 10**
-    * Then grab a screenshot with 's' key pressed
+    * Then grab a screenshot with 's' key pressed (file will be in media folder)
     * Then change desired screenshot name to '0.png'
     * Then change editROIUsingImage = false on line 34 in debug.cpp to true
     * Then change ROI parameters until ROI frame contains only lane information
     * Then copy these ROI parameters to the release.cpp constants
-    * Then Re-compile and run release.cpp using step 7
+    * Then re-compile and run release.cpp using step 1
     * Make sure camera position does not move
 
 4. Expected performance in release.cpp should be around 0.8 FPS but to increase this to 8.8 FPS:
