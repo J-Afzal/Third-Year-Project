@@ -620,6 +620,31 @@ int main(void)
 		else
 			rightLineType = rightLineTypeRollingAverage.calculateRollingAverage(2);
 
+
+
+		// Draw a filled black rectangle for the information on RHS
+		cv::rectangle(frame, rightInfoRect, cv::Scalar(0), cv::FILLED, cv::LINE_AA, 0);
+
+		// These statements add the current line state to the beginning of a
+		// STL deque container and then remove the end value, thus keeping it a size of 5
+		leftLineTypesForDisplay.push_front(leftLineType);
+		leftLineTypesForDisplay.pop_back();
+
+		middleLineTypesForDisplay.push_front(middleLineType);
+		middleLineTypesForDisplay.pop_back();
+
+		rightLineTypesForDisplay.push_front(rightLineType);
+		rightLineTypesForDisplay.pop_back();
+
+		// Left line state on RHS box
+		for (i = 0; i < leftLineTypesForDisplay.size(); i++)
+			cv::rectangle(frame, cv::Rect(1595, 80 + i * 50, 4, 25 * leftLineTypesForDisplay[i]), cv::Scalar(255, 255, 255), cv::FILLED, cv::LINE_AA);
+		// Right line state on RHS box
+		for (i = 0; i < rightLineTypesForDisplay.size(); i++)
+			cv::rectangle(frame, cv::Rect(1795, 80 + i * 50, 4, 25 * rightLineTypesForDisplay[i]), cv::Scalar(255, 255, 255), cv::FILLED, cv::LINE_AA);
+
+
+
 		// Determine which driving state the car is currently in
 		// and then input this value to the rolling averages
 		// Within Lanes
@@ -650,29 +675,6 @@ int main(void)
 		// No road marking detected
 		else //((leftLines.size() == 0) && (middleLines.size() == 0) && (rightLines.size() == 0))
 			drivingState = drivingStateRollingAverage.calculateRollingAverage(4);
-
-
-
-		// Draw a filled black rectangle for the information on RHS
-		cv::rectangle(frame, rightInfoRect, cv::Scalar(0), cv::FILLED, cv::LINE_AA, 0);
-
-		// These statements add the current line state to the beginning of a
-		// STL deque container and then remove the end value, thus keeping it a size of 5
-		leftLineTypesForDisplay.push_front(leftLineType);
-		leftLineTypesForDisplay.pop_back();
-
-		middleLineTypesForDisplay.push_front(middleLineType);
-		middleLineTypesForDisplay.pop_back();
-
-		rightLineTypesForDisplay.push_front(rightLineType);
-		rightLineTypesForDisplay.pop_back();
-
-		// Left line state on RHS box
-		for (i = 0; i < leftLineTypesForDisplay.size(); i++)
-			cv::rectangle(frame, cv::Rect(1595, 80 + i * 50, 4, 25 * leftLineTypesForDisplay[i]), cv::Scalar(255, 255, 255), cv::FILLED, cv::LINE_AA);
-		// Right line state on RHS box
-		for (i = 0; i < rightLineTypesForDisplay.size(); i++)
-			cv::rectangle(frame, cv::Rect(1795, 80 + i * 50, 4, 25 * rightLineTypesForDisplay[i]), cv::Scalar(255, 255, 255), cv::FILLED, cv::LINE_AA);
 
 
 
