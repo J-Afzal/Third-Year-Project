@@ -551,26 +551,26 @@ int main(void)
 
 
 
-			// Draw a filled black rectangle for the information on RHS
-			cv::rectangle(frame, rightInfoRect, cv::Scalar(0), cv::FILLED, cv::LINE_AA, 0);
+		// Draw a filled black rectangle for the information on RHS
+		cv::rectangle(frame, rightInfoRect, cv::Scalar(0), cv::FILLED, cv::LINE_AA, 0);
 
-			// These statements add the current line state to the beginning of a
-			// STL deque container and then remove the end value, thus keeping it a size of 5
-			leftLineTypesForDisplay.push_front(leftLineType);
-			leftLineTypesForDisplay.pop_back();
+		// These statements add the current line state to the beginning of a
+		// STL deque container and then remove the end value, thus keeping it a size of 5
+		leftLineTypesForDisplay.push_front(leftLineType);
+		leftLineTypesForDisplay.pop_back();
 
-			middleLineTypesForDisplay.push_front(middleLineType);
-			middleLineTypesForDisplay.pop_back();
+		middleLineTypesForDisplay.push_front(middleLineType);
+		middleLineTypesForDisplay.pop_back();
 
-			rightLineTypesForDisplay.push_front(rightLineType);
-			rightLineTypesForDisplay.pop_back();
+		rightLineTypesForDisplay.push_front(rightLineType);
+		rightLineTypesForDisplay.pop_back();
 
-			// Left line state on RHS box
-			for (i = 0; i < leftLineTypesForDisplay.size(); i++)
-				cv::rectangle(frame, cv::Rect(1595, 80 + i * 50, 4, 25 * leftLineTypesForDisplay[i]), cv::Scalar(255, 255, 255), cv::FILLED, cv::LINE_AA);
-			// Right line state on RHS box
-			for (i = 0; i < rightLineTypesForDisplay.size(); i++)
-				cv::rectangle(frame, cv::Rect(1795, 80 + i * 50, 4, 25 * rightLineTypesForDisplay[i]), cv::Scalar(255, 255, 255), cv::FILLED, cv::LINE_AA);
+		// Left line state on RHS box
+		for (i = 0; i < leftLineTypesForDisplay.size(); i++)
+			cv::rectangle(frame, cv::Rect(1595, 80 + i * 50, 4, 25 * leftLineTypesForDisplay[i]), cv::Scalar(255, 255, 255), cv::FILLED, cv::LINE_AA);
+		// Right line state on RHS box
+		for (i = 0; i < rightLineTypesForDisplay.size(); i++)
+			cv::rectangle(frame, cv::Rect(1795, 80 + i * 50, 4, 25 * rightLineTypesForDisplay[i]), cv::Scalar(255, 255, 255), cv::FILLED, cv::LINE_AA);
 
 
 
