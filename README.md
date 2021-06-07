@@ -1,3 +1,13 @@
+## WARNING
+The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit but can be downloaded from [here](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights).
+
+## YouTube Playlist
+The YouTube playlist for this project can be found [here](https://youtube.com/playlist?list=PLFJGOGaRWoxDm-Em5-mNv7JbYHmCRMm9b):
+* `Pre-recorded Video Test` shows an example of lane detection on roads that the software was developed on and for (motorways)
+* `Real World Test (Roof FOV)` and `Real World Test (Bonnet FOV)` The bonnet camera location was able to detect the fainter/less defined road markings than the roof camera location, due to its closer proximity to the road, while the roof camera location gave less false lanes detections/less noisy
+* `Software Analysis for No YOLOv4` shows the frame times for the software side by side with the output and that peaks occur during lane detection when many road markings picked up in the ROI frame
+* `A Potential Curved Road Solution` shows a potential solution to detecting heavily curved roads. Compare this video with 'Software Analysis for No YOLOv4' in terms of lane detection and pay attention to how the ROI frame moves at the top left
+
 ## Screenshots from the Real World Test
 <p align="center">
  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%201.png">
@@ -14,12 +24,6 @@
 <p align="center">
  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Bonnet%202.png">
 </p>
-
-The YouTube playlist for this project can be found [here](https://youtube.com/playlist?list=PLFJGOGaRWoxDm-Em5-mNv7JbYHmCRMm9b):
-* `Pre-recorded Video Test` shows an example of lane detection on roads that the software was developed on and for (motorways)
-* `Real World Test (Roof FOV)` and `Real World Test (Bonnet FOV)` The bonnet camera location was able to detect the fainter/less defined road markings than the roof camera location, due to its closer proximity to the road, while the roof camera location gave less false lanes detections/less noisy
-* `Software Analysis for No YOLOv4` shows the frame times for the software side by side with the output and that peaks occur during lane detection when many road markings picked up in the ROI frame
-* `A Potential Curved Road Solution` shows a potential solution to detecting heavily curved roads. Compare this video with 'Software Analysis for No YOLOv4' in terms of lane detection and pay attention to how the ROI frame moves at the top left
 
 ## Performance of the Software
 <p align="center">
@@ -188,6 +192,3 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 4. Expected performance in release.cpp should be around 0.8 FPS but to increase this to 8.8 FPS:
     * Change line 62 from `cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4.cfg", "../yolo/yolov4.weights");` to `cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4-tiny.cfg", "../yolo/yolov4-tiny.weights");`
     * Reduce blob size from 608 to 288 on line 110 from `constexpr int BLOB_SIZE = 608;` to `constexpr int BLOB_SIZE = 288;`
-
-## WARNING
-The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit but can be downloaded from [here](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights).
