@@ -1,5 +1,5 @@
-## WARNING
-The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit but can be downloaded from [here](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights).
+## Project Thesis
+`thesis.pdf` contains all the findings from the project
 
 ## YouTube Playlist
 The YouTube playlist for this project can be found [here](https://youtube.com/playlist?list=PLFJGOGaRWoxDm-Em5-mNv7JbYHmCRMm9b):
@@ -46,6 +46,9 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
   * Changed GoPro 'HDMI output' setting to 'Live'
 * Waveshare Metal Case for the Jetson Nano
 * Keyboard & Mouse
+
+## WARNING
+The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit but can be downloaded from [here](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights).
 
 ## Instructions for Setting up Windows 10 (1.5hrs)
 0. Download all pre-requisites
