@@ -47,9 +47,6 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 * Waveshare Metal Case for the Jetson Nano
 * Keyboard & Mouse
 
-## WARNING
-The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit but can be downloaded from [here](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights).
-
 ## Instructions for Setting up Windows 10 (1.5hrs)
 0. Download all pre-requisites
     * Microsoft Visual Studio
@@ -151,6 +148,9 @@ The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit
        sudo make install -j4 && \
        sudo sh -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf' && \
        sudo ldconfig
+
+## WARNING
+The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit but can be downloaded from [here](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights) and should be copied to the `yolo` folder.
 
 ## Running the software
 0. Assuming that you are in the Third-Year-Project/code folder
