@@ -304,7 +304,7 @@ int main(void)
 			}
 		}
 
-		// Apply non-maxima suppression to supress overlapping bounding boxes
+		// Apply non-maxima suppression to suppress overlapping bounding boxes
 		// For objects that overlap, the highest confidence object will be chosen
 		cv::dnn::NMSBoxes(preNMSObjectBoundingBoxes, preNMSObjectConfidences, 0.0, YOLO_NMS_THRESHOLD, indicesAfterNMS);
 
@@ -435,7 +435,7 @@ int main(void)
 					((houghLines[i][1] >= ROI_BOTTOM_HEIGHT - 1) && (houghLines[i][3] >= ROI_BOTTOM_HEIGHT - 1)))
 					continue;
 
-				// If longer than HORIZONTAL_LENGTH_THRESHOLD then definately horizontal
+				// If longer than HORIZONTAL_LENGTH_THRESHOLD then definitely horizontal
 				if (std::sqrt(dy * dy + dx * dx) > HORIZONTAL_LENGTH_THRESHOLD)
 				{
 					horizontalCount++;

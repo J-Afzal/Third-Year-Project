@@ -10,24 +10,16 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 
 ## Screenshots from the Real World Test
 <p align="center">
- <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%201.png">
-</p>
-<p align="center">
- <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%202.png">
-</p>
-<p align="center">
- <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%203.png">
-</p>
-<p align="center">
- <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Bonnet%201.png">
-</p>
-<p align="center">
- <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Bonnet%202.png">
+  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%201.png">
+  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%202.png">
+  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%203.png">
+  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Bonnet%201.png">
+  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Bonnet%202.png">
 </p>
 
 ## Performance of the Software
 <p align="center">
- <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/tests/Graphs/All%20Platforms%20FPS%20Plots.png">
+  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/tests/Graphs/All%20Platforms%20FPS%20Plots.png">
 </p>
 
 `Desktop` = Ryzen 5800x, GTX 960 4 GB, and 32 GB RAM and `Jetson Nano` = Jetson Nano 4 GB (B01 Model)
@@ -80,7 +72,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
       * Include Directories  
         * add {Path to build folder}\install\include
         * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include
-      * Library Directories 
+      * Library Directories
         * add {Path to build folder}\install\x64\vc16\lib
         * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\lib\x64
     * Linker
@@ -91,7 +83,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 ## Instructions for Setting up the Jetson Nano (4hrs) / Ubuntu Desktop (1.5hrs)
 
 0. Setup Jetson Nano (Skip for Ubuntu Desktop)
-    * Download NVIDIA Jetpack SDK 4.5.1 from https://developer.nvidia.com/embedded/jetpack 
+    * Download NVIDIA Jetpack SDK 4.5.1 from https://developer.nvidia.com/embedded/jetpack
     * Format and flash SD card with the downloaded file
       * `Formatter` = https://www.sdcard.org/downloads/formatter/sd-memory-card-formatter-for-windows-download/
       * `Flasher` = https://www.balena.io/etcher/
@@ -166,13 +158,13 @@ The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit
     * Create a Microsoft Visual Studio project
     * Add release.cpp, rollingAverage.h, rollingAverage.cpp
     * Do step 7 for 'Instructions for Setting up Windows 10'
-     
+
 2. If webcam output desired, then change line 15 in release.cpp from (However, make sure the lane is within the ROI frame, which is in the centre of the frame and slightly down):
-   
+
    `cv::VideoCapture inputVideo("../media/motorway.mp4");` to `cv::VideoCapture inputVideo(0);`
 
 3. Or debug.cpp can be ran to adjust the ROI position by running the following:
-     
+
     **Jetson Nano/Ubuntu**
 
        g++ debug.cpp rollingAverage.cpp -O3 -o YOLO_debug.out `pkg-config opencv --cflags --libs` && \
