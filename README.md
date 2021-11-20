@@ -20,8 +20,12 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 # Performance of the Software
 <p align="center">
   <img src="tests/Graphs/All%20Platforms%20FPS%20Plots.png">
-  `Desktop` = Ryzen 5800x, GTX 960 4 GB, and 32 GB RAM and `Jetson Nano` = Jetson Nano 4 GB (B01 Model)
 </p>
+<h4 align="center">
+  Desktop = Ryzen 5800x, GTX 960 4 GB, and 32 GB RAM
+
+  Jetson Nano = Jetson Nano 4 GB (B01 Model)
+</h4>
 
 # Components used in the final software-hardware package:
 * Jetson Nano 4 GB (B01 Model)
@@ -116,7 +120,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
        mkdir build && cd build
 
 5. Build OpenCV with CUDA (For the Jetson Nano make sure there is an extra 4 GB (so total 6 GB) of swap memory using jtop and then remove after compilation)
-      
+
        cmake \
        -D CMAKE_BUILD_TYPE=RELEASE \
        -D CMAKE_INSTALL_PREFIX=/usr/local \
