@@ -1,30 +1,29 @@
-## Project Thesis
+# Project Thesis
 `thesis.pdf` contains all the findings from the project
 
-## YouTube Playlist
+# YouTube Playlist
 The YouTube playlist for this project can be found [here](https://youtube.com/playlist?list=PLFJGOGaRWoxDm-Em5-mNv7JbYHmCRMm9b):
 * `Pre-recorded Video Test` shows an example of lane detection on roads that the software was developed on and was for (motorways)
 * `Real World Test (Roof FOV)` and `Real World Test (Bonnet FOV)` The bonnet camera location was able to detect the fainter/less defined road markings than the roof camera location, due to its closer proximity to the road, while the roof camera location gave less false lanes detections/less noisy
 * `Software Analysis for No YOLOv4` shows the frame times for the software side by side with the output and that peaks occur during lane detection when many road markings picked up in the ROI frame
 * `A Potential Curved Road Solution` shows a potential solution to detecting heavily curved roads. Compare this video with 'Software Analysis for No YOLOv4' in terms of lane detection and pay attention to how the ROI frame moves at the top left
 
-## Screenshots from the Real World Test
+# Screenshots from the Real World Test
 <p align="center">
-  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%201.png">
-  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%202.png">
-  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Roof%203.png">
-  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Bonnet%201.png">
-  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/media/Example%20Output%20Bonnet%202.png">
+  <img src="media/Example%20Output%20Roof%201.png">
+  <img src="media/Example%20Output%20Roof%202.png">
+  <img src="media/Example%20Output%20Roof%203.png">
+  <img src="media/Example%20Output%20Bonnet%201.png">
+  <img src="media/Example%20Output%20Bonnet%202.png">
 </p>
 
-## Performance of the Software
+# Performance of the Software
 <p align="center">
-  <img src="https://github.com/J-Afzal/Third-Year-Project/blob/main/tests/Graphs/All%20Platforms%20FPS%20Plots.png">
+  <img src="tests/Graphs/All%20Platforms%20FPS%20Plots.png">
+  `Desktop` = Ryzen 5800x, GTX 960 4 GB, and 32 GB RAM and `Jetson Nano` = Jetson Nano 4 GB (B01 Model)
 </p>
 
-`Desktop` = Ryzen 5800x, GTX 960 4 GB, and 32 GB RAM and `Jetson Nano` = Jetson Nano 4 GB (B01 Model)
-
-## Components used in the final software-hardware package:
+# Components used in the final software-hardware package:
 * Jetson Nano 4 GB (B01 Model)
 * HDMI cable for Jetson Nano output
 * Micro-USB cable or barrel plug for power
@@ -39,7 +38,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 * Waveshare Metal Case for the Jetson Nano
 * Keyboard & Mouse
 
-## Instructions for Setting up Windows 10 (1.5hrs)
+# Instructions for Setting up Windows 10 (1.5hrs)
 0. Download all pre-requisites
     * Microsoft Visual Studio
     * CMake (Add to PATH)
@@ -69,7 +68,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
 
 7. For each Microsoft Visual Studio project, go to project properties:
     * VC++ directories
-      * Include Directories  
+      * Include Directories
         * add {Path to build folder}\install\include
         * add C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.2\include
       * Library Directories
@@ -78,9 +77,9 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
     * Linker
       * Additional Dependencies
         * add opencv_world451.lib
-        * add cudart.lib  
+        * add cudart.lib
 
-## Instructions for Setting up the Jetson Nano (4hrs) / Ubuntu Desktop (1.5hrs)
+# Instructions for Setting up the Jetson Nano (4hrs) / Ubuntu Desktop (1.5hrs)
 
 0. Setup Jetson Nano (Skip for Ubuntu Desktop)
     * Download NVIDIA Jetpack SDK 4.5.1 from https://developer.nvidia.com/embedded/jetpack
@@ -117,7 +116,7 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
        mkdir build && cd build
 
 5. Build OpenCV with CUDA (For the Jetson Nano make sure there is an extra 4 GB (so total 6 GB) of swap memory using jtop and then remove after compilation)
-
+      
        cmake \
        -D CMAKE_BUILD_TYPE=RELEASE \
        -D CMAKE_INSTALL_PREFIX=/usr/local \
@@ -141,10 +140,10 @@ The YouTube playlist for this project can be found [here](https://youtube.com/pl
        sudo sh -c 'echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf' && \
        sudo ldconfig
 
-## WARNING
+# WARNING
 The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit but can be downloaded from [here](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights) and should be copied to the `yolo` folder.
 
-## Running the software
+# Running the software
 0. Assuming that you are in the Third-Year-Project/code folder
 
 1. Run release.cpp with motorway.mp4 vid (For windows make sure x64 and release settings have been selected and hit F5 to run)
@@ -156,12 +155,14 @@ The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit
 
     **Windows 10**
     * Create a Microsoft Visual Studio project
-    * Add release.cpp, rollingAverage.h, rollingAverage.cpp
+    * Add `release.cpp`, `rollingAverage.h` and `rollingAverage.cpp`
     * Do step 7 for 'Instructions for Setting up Windows 10'
 
 2. If webcam output desired, then change line 15 in release.cpp from (However, make sure the lane is within the ROI frame, which is in the centre of the frame and slightly down):
 
-   `cv::VideoCapture inputVideo("../media/motorway.mp4");` to `cv::VideoCapture inputVideo(0);`
+   ```c++
+   cv::VideoCapture inputVideo("../media/motorway.mp4");` to `cv::VideoCapture inputVideo(0);
+   ```
 
 3. Or debug.cpp can be ran to adjust the ROI position by running the following:
 
@@ -185,5 +186,19 @@ The yolo4.weights file could not be uploaded due to GitHub's 100 MB upload limit
     * Make sure camera position does not move
 
 4. Expected performance in release.cpp should be around 0.8 FPS but to increase this to 8.8 FPS:
-    * Change line 62 from `cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4.cfg", "../yolo/yolov4.weights");` to `cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4-tiny.cfg", "../yolo/yolov4-tiny.weights");`
-    * Reduce blob size from 608 to 288 on line 110 from `constexpr int BLOB_SIZE = 608;` to `constexpr int BLOB_SIZE = 288;`
+    * Change line 62 from
+        ```c++
+        cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4.cfg", "../yolo/yolov4.weights");
+        ```
+        to the following
+        ```c++
+        cv::dnn::Net net = cv::dnn::readNetFromDarknet("../yolo/yolov4-tiny.cfg", "../yolo/yolov4-tiny.weights");
+        ```
+    * Reduce blob size from 608 to 288 on line 110 from
+        ```c++
+        constexpr int BLOB_SIZE = 608;
+        ```
+        to the following
+        ```c++
+        constexpr int BLOB_SIZE = 288;
+        ```
