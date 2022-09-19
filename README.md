@@ -1,8 +1,8 @@
 # Project Thesis
 `thesis.pdf` contains all the findings from the project
 
-# YouTube Playlist
-The YouTube playlist for this project can be found [here](https://youtube.com/playlist?list=PLFJGOGaRWoxDm-Em5-mNv7JbYHmCRMm9b):
+# Results
+The `results` folder contains the following videos:
 * `Pre-recorded Video Test` shows an example of lane detection on roads that the software was developed on and was for (motorways)
 * `Real World Test (Roof FOV)` and `Real World Test (Bonnet FOV)` The bonnet camera location was able to detect the fainter/less defined road markings than the roof camera location, due to its closer proximity to the road, while the roof camera location gave less false lanes detections/less noisy
 * `Software Analysis for No YOLOv4` shows the frame times for the software side by side with the output and that peaks occur during lane detection when many road markings picked up in the ROI frame
